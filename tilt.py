@@ -5,7 +5,7 @@
 # pan1 och tilt1 bestäms av användaren
 # B = avståndet från kameran till fokuspunkten
 #VIKTIGT: skriv "import math" i main <3
-hej
+
 
 #Beräkna
 getB (S, tilt1):
