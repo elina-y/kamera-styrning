@@ -16,6 +16,16 @@ req = requests.get(url)
 
 #r = requests.post('http://169.254.203.231/axis-cgi/com/ptz.cgi?tilt=50')
 print(req.text)
+text = req.text
+textarray = text.splitlines()
+pan = float(textarray[0].split('=')[1])
+tilt = float(textarray[1].split('=')[1])
+test = 5+pan
+
+if "tilt" in text:
+    print ("tilt")
+
+print (test)
 
 #URL ="http://169.254.30.179/axis-cgi/com/ptz.cgi?query=position"
 username = 'root'
