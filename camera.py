@@ -44,7 +44,7 @@ def getPan2 (R, pan1, tilt1, B):
     Rtak = B*math.cos(tilt1)
     Ctak = math.sqrt((R*R) + (Rtak*Rtak) - 2 * R * Rtak * math.cos(pan1))
     pan2 = math.asin(Rtak * (math.sin(pan1) / Ctak))
-    return string(pan2)
+    return str(pan2)
 
 # Beräkna tilt2
 def getTilt2 (R, pan1, tilt1, B, S):
@@ -52,26 +52,32 @@ def getTilt2 (R, pan1, tilt1, B, S):
     Cvagg = math.sqrt((R*R) + (Rvagg*Rvagg) - 2 * R * Rvagg * math.cos(tilt1))
     tilt2 = math.asin(Rvagg * (math.sin(tilt1) / Cvagg))
     if (tilt2 != 90):
-        return string(tilt2)
+        return str(tilt2)
     else:
-        C90 = math.sqrt(B^2 - R^2)
+        C90 = math.sqrt(B*B - R*R)
         tilt2 = math.asin(S - C90)
-        return string(tilt2)
+        return str(tilt2)
 
 def move() :
-    r = requests.get(urlcam1+"tilt="+tilt1)
-    r = requests.get(urlcam1+"pan="+pan1)
-    r = requests.get(urlcam1+"tilt="+tilt2)
-    r = requests.get(urlcam1+"pan="+pan2)
+    r = requests.get(urlcam1+"tilt="+str(tilt1))
+    r = requests.get(urlcam1+"pan="+str(pan1))
+    r = requests.get(urlcam2+"tilt=-"+tilt2)
+    r = requests.get(urlcam2+"pan=-"+pan2)
 
 S = 1.3
 R = 0.12
 while 1!=0 :
-    pan1 = "150"
-    tilt1= "30"
+    print("Bestäm pan")
+    pan1 = input()
+    #pan1 = "32"
+    print ("Bestäm tilt")
+    tilt1= input()
+    #tilt1 = "64"
+    print("du har valt "+pan1+" och "+ tilt1)
     pan1 = Decimal(pan1)
     tilt1 = Decimal(tilt1)
     B = getB(S,tilt1)
     pan2  = getPan2(R,pan1,tilt1,B)
     tilt2 = getTilt2(R,pan1,tilt1,B,S)
     move()
+    continue
