@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 import requests
 import math
 from decimal import Decimal
@@ -13,7 +14,11 @@ global pan20
 global tilt10
 global pan10
 
+=======
+>>>>>>> d5cf306478ae0923b76242712f44240ef861ffc2
 
+<<<<<<< HEAD
+=======
 
 #tilt gar mellan 0 - -90 grader vertikalt
 
@@ -101,3 +106,4 @@ while 1!=0 :
     tilt2 = getTilt2(R,pan1,tilt1,B,S)
     move()
     continue
+>>>>>>> abc6c5edde5c1537e1a2eeb984a49965c672a64d
