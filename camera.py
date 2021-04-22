@@ -2,15 +2,20 @@ import requests
 import math
 
 global pan1
-global  tilt1
+global pan2
+global tilt1
+global tilt2
+global R
+global S
+global B
 
 
-#tilt går mellan 0 - -90 grader vertikalt
+#tilt gar mellan 0 - -90 grader vertikalt
 
-# R = avstånd mellan kamerorna (m)
-# S = kamerornas höjd från golvet (m)
+# R = avstand mellan kamerorna (m)
+# S = kamerornas hojd från golvet (m)
 # pan1 och tilt1 bestäms av användaren
-# B = avståndet från kameran till fokuspunkten
+# B = avstandet från kameran till fokuspunkten
 #VIKTIGT: skriv "import math" i main <3
 
 #todo:
@@ -52,9 +57,11 @@ def getTilt2 (R, pan1, tilt1, B, S):
         C90 = math.sqrt(B^2 - R^2)
         tilt2 = math.asin(S - C90)
         return string(tilt2)
-i = 0
-while i<6 :
+
+while(true):
     pan1 = input()
     tilt1= input()
-    print(pan1)
-    print(tilt1)
+    B = getB(S,tilt2)
+    pan2  = getPan2(R,pan1,tilt1,B)
+    tilt2 = getTilt2(R,pan1,tilt1,B,S)
+    
