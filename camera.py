@@ -1,6 +1,6 @@
 import requests
 import math
-
+from decimal import Decimal
 global pan1
 global pan2
 global tilt1
@@ -42,14 +42,14 @@ def getB(S, tilt1):
 # Beräkna pan2
 def getPan2 (R, pan1, tilt1, B):
     Rtak = B*math.cos(tilt1)
-    Ctak = math.sqrt((R^2) + (Rtak^2) - 2 * R * Rtak * math.cos(pan1))
+    Ctak = math.sqrt((R*R) + (Rtak*Rtak) - 2 * R * Rtak * math.cos(pan1))
     pan2 = math.asin(Rtak * (math.sin(pan1) / Ctak))
     return string(pan2)
 
 # Beräkna tilt2
 def getTilt2 (R, pan1, tilt1, B, S):
     Rvagg = B*math.cos(pan1)
-    Cvagg = math.sqrt((R^2) + (Rvagg^2) - 2 * R * Rvagg * math.cos(tilt1))
+    Cvagg = math.sqrt((R*R) + (Rvagg*Rvagg) - 2 * R * Rvagg * math.cos(tilt1))
     tilt2 = math.asin(Rvagg * (math.sin(tilt1) / Cvagg))
     if (tilt2 != 90):
         return string(tilt2)
@@ -58,10 +58,20 @@ def getTilt2 (R, pan1, tilt1, B, S):
         tilt2 = math.asin(S - C90)
         return string(tilt2)
 
-while(true):
-    pan1 = input()
-    tilt1= input()
-    B = getB(S,tilt2)
+def move() :
+    r = requests.get(urlcam1+"tilt="+tilt1)
+    r = requests.get(urlcam1+"pan="+pan1)
+    r = requests.get(urlcam1+"tilt="+tilt2)
+    r = requests.get(urlcam1+"pan="+pan2)
+
+S = 1.3
+R = 0.12
+while 1!=0 :
+    pan1 = "150"
+    tilt1= "30"
+    pan1 = Decimal(pan1)
+    tilt1 = Decimal(tilt1)
+    B = getB(S,tilt1)
     pan2  = getPan2(R,pan1,tilt1,B)
     tilt2 = getTilt2(R,pan1,tilt1,B,S)
-    
+    move()
