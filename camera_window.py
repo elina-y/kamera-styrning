@@ -4,13 +4,15 @@ import PIL.ImageTk
 import PIL.Image
 import time
 
-window = tk.Tk()
+#window = tk.Tk()
 #greeting = tk.Label(text="Hello, Tkinter")
 #greeting.pack()
-captureStor = cv2.VideoCapture('rtsp://root.pass@169.254.203.231/axis-media/media.amp')
+#captureStor = cv2.VideoCapture('rtsp://root.pass@169.254.203.231/axis-media/media.amp')
+captureStor = cv2.VideoCapture('rtsp://wowzaec2demo.streamlock.net/vod/mp4:BigBuckBunny_115k.mov')
+
 
 class App:
-    def __init__(self, window, window_title, video_source='rtsp://root.pass@169.254.203.231/axis-media/media.amp'):
+    def __init__(self, window, window_title, video_source='rtsp://wowzaec2demo.streamlock.net/vod/mp4:BigBuckBunny_115k.mov'):
         self.window = window
         self.window.title(window_title)
         self.video_source = video_source
@@ -28,7 +30,7 @@ class App:
 
          # After it is called once, the update method will be automatically called every delay milliseconds
         self.delay = 15
-        #self.update()
+        self.update()
 
         self.window.mainloop()
 
@@ -41,17 +43,20 @@ class App:
 
     def update(self):
          # Get a frame from the video source
+         #print("Nu är jag i update")
          ret, frame = self.vid.get_frame()
+         #print(frame)
 
          if ret:
              self.photo = PIL.ImageTk.PhotoImage(image = PIL.Image.fromarray(frame))
+             #print(self.photo)
              self.canvas.create_image(0, 0, image = self.photo, anchor = tk.NW)
 
          self.window.after(self.delay, self.update)
 
 
 class MyVideoCapture:
-     def __init__(self, video_source='rtsp://root.pass@169.254.203.231/axis-media/media.amp'):
+     def __init__(self, video_source='rtsp://wowzaec2demo.streamlock.net/vod/mp4:BigBuckBunny_115k.mov'):
          # Open the video source
          self.vid = cv2.VideoCapture(video_source)
          if not self.vid.isOpened():
