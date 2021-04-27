@@ -12,21 +12,28 @@ captureStor = cv2.VideoCapture('rtsp://wowzaec2demo.streamlock.net/vod/mp4:BigBu
 
 
 class App:
-    def __init__(self, window, window_title, video_source='rtsp://wowzaec2demo.streamlock.net/vod/mp4:BigBuckBunny_115k.mov'):
+    def __init__(self, window, window_title, video_source1='rtsp://wowzaec2demo.streamlock.net/vod/mp4:BigBuckBunny_115k.mov', video_source2='rtsp://wowzaec2demo.streamlock.net/vod/mp4:BigBuckBunny_115k.mov'):
         self.window = window
         self.window.title(window_title)
-        self.video_source = video_source
+        self.video_source1 = video_source1
+        self.video_source2 = video_source2
 
-     # open video source (by default this will try to open the computer webcam)
-        self.vid = MyVideoCapture(self.video_source)
+     # open video source
+        self.vid1 = MyVideoCapture(self.video_source1, self.video_source2)
+
 
          # Create a canvas that can fit the above video source size
-        self.canvas = tk.Canvas(window, width = self.vid.width, height = self.vid.height)
-        self.canvas.pack()
+        self.canvas1 = tk.Canvas(window, width=self.vid1.width, height=self.vid1.height)
+        self.canvas2 = tk.Canvas(window, width=self.vid1.width, height=self.vid1.height)
+        self.canvas1.pack(padx=5, pady=10, side="left")
+        self.canvas2.pack(padx=5, pady=60, side="left")
+
+        #self.canvas = tk.Canvas(window, width = self.vid1.width+self.vid2.width, height = self.vid1.height)
+        #self.canvas.pack()
 
          # Button that lets the user take a snapshot
-        self.btn_snapshot=tk.Button(window, text="Snapshot", width=50, command=self.snapshot)
-        self.btn_snapshot.pack(anchor=tk.CENTER, expand=True)
+        #self.btn_snapshot=tk.Button(window, text="Snapshot", width=50, command=self.snapshot)
+        #self.btn_snapshot.pack(anchor=tk.CENTER, expand=True)
 
          # After it is called once, the update method will be automatically called every delay milliseconds
         self.delay = 15
@@ -44,43 +51,62 @@ class App:
     def update(self):
          # Get a frame from the video source
          #print("Nu är jag i update")
-         ret, frame = self.vid.get_frame()
+         ret1, frame1, ret2, frame2 = self.vid1.get_frame()
+         #ret, frame1 = self.vid1.get_frame()
+         #ret, frame2 = self.vid2.get_frame()
          #print(frame)
 
-         if ret:
-             self.photo = PIL.ImageTk.PhotoImage(image = PIL.Image.fromarray(frame))
+         if ret1 and ret2:
+                self.photo1 = PIL.ImageTk.PhotoImage(image=PIL.Image.fromarray(frame1))
+                self.photo2 = PIL.ImageTk.PhotoImage(image=PIL.Image.fromarray(frame2))
+                self.canvas1.create_image(0, 0, image=self.photo1, anchor=tk.NW)
+                self.canvas2.create_image(0, 0, image=self.photo2, anchor=tk.NW)
+
+             #self.photo1 = PIL.ImageTk.PhotoImage(image = PIL.Image.fromarray(frame1))
+             #self.photo2 = PIL.ImageTk.PhotoImage(image = PIL.Image.fromarray(frame2))
              #print(self.photo)
-             self.canvas.create_image(0, 0, image = self.photo, anchor = tk.NW)
+             #self.canvas.create_image(0, 0, image = self.photo1, anchor = tk.NW)
+             #self.canvas.create_image(0, 0, image = self.photo2, anchor = tk.NE)
 
          self.window.after(self.delay, self.update)
 
 
 class MyVideoCapture:
-     def __init__(self, video_source='rtsp://wowzaec2demo.streamlock.net/vod/mp4:BigBuckBunny_115k.mov'):
+    #
+     def __init__(self, video_source1, video_source2):
          # Open the video source
-         self.vid = cv2.VideoCapture(video_source)
-         if not self.vid.isOpened():
-             raise ValueError("Unable to open video source", video_source)
+         #self.vid = cv2.VideoCapture(video_source)
+         self.vid1 = cv2.VideoCapture(video_source1)
+         self.vid2 = cv2.VideoCapture(video_source2)
+         if not self.vid1.isOpened():
+             raise ValueError("Unable to open video source", video_source1)
 
          # Get video source width and height
-         self.width = self.vid.get(cv2.CAP_PROP_FRAME_WIDTH)
-         self.height = self.vid.get(cv2.CAP_PROP_FRAME_HEIGHT)
+         print("Nu är jag i MyvideoCapture")
+         self.width = self.vid1.get(cv2.CAP_PROP_FRAME_WIDTH)
+         self.height = self.vid1.get(cv2.CAP_PROP_FRAME_HEIGHT)
 
      def get_frame(self):
-         if self.vid.isOpened():
-             ret, frame = self.vid.read()
-             if ret:
+         if self.vid1.isOpened() and self.vid2.isOpened():
+
+             ret1, frame1 = self.vid1.read()
+             ret2, frame2 = self.vid2.read()
+             #frame1 = cv2.resize(frame1, (500, 500))
+             #frame2 = cv2.resize(frame2, (500, 500))
+             if ret1 and ret2:
                  # Return a boolean success flag and the current frame converted to BGR
-                 return (ret, cv2.cvtColor(frame, cv2.COLOR_BGR2RGB))
+                 return ret1, cv2.cvtColor(frame1, cv2.COLOR_BGR2RGB), ret2, cv2.cvtColor(frame2, cv2.COLOR_BGR2RGB)
              else:
-                 return (ret, None)
+                 return ret1, None, ret2, None
          else:
-             return (ret, None)
+             return ret1, None, ret2, None
 
      # Release the video source when the object is destroyed
      def __del__(self):
-         if self.vid.isOpened():
-             self.vid.release()
+        if self.vid1.isOpened():
+            self.vid1.release()
+        if self.vid2.isOpened():
+            self.vid2.release()
 
  # Create a window and pass it to the Application object
 App(tk.Tk(), "Tkinter and OpenCV")
