@@ -1,44 +1,5 @@
-<<<<<<< HEAD
+
 import requests
-<<<<<<< HEAD
-#import urllib3
-#from requests.auth import HTTPBasicAuth
-#from urllib.parse import urlencode
-
-#http = urllib3.PoolManager()
-#auth = urllib3.make_headers(HTTPBasicAuth('root','pass'))
-#payload = {'inUserName': 'root','inUserPass':'pass'}
-url = 'http://169.254.203.231/axis-cgi/com/ptz.cgi?query=position'
-
- #r = requests.get(url, auth=('root', 'pass'))
-#r = requests.post(url,payload)
-r = requests.get('http://169.254.203.231/axis-cgi/com/ptz.cgi?tilt=27')
-req = requests.get(url)
-
-
-#r = requests.post('http://169.254.203.231/axis-cgi/com/ptz.cgi?tilt=50')
-print(req.text)
-text = req.text
-textarray = text.splitlines()
-pan = float(textarray[0].split('=')[1])
-tilt = float(textarray[1].split('=')[1])
-test = 5+pan
-
-if "tilt" in text:
-    print ("tilt")
-
-print (test)
-
-#URL ="http://169.254.30.179/axis-cgi/com/ptz.cgi?query=position"
-username = 'root'
-password = 'pass'
-#values = { 'username': username,'password': password }
-#data = urllib.urlencode(values)
-#req = urllib3.request(URL, data)
-#response = urllib2.urlopen(req)
-#result = response.read()
-#r = requests.get(url,HTTPBasicAuth('root','pass'))
-=======
 import math
 from decimal import Decimal
 global pan1
@@ -53,11 +14,6 @@ global pan20
 global tilt10
 global pan10
 
-=======
->>>>>>> d5cf306478ae0923b76242712f44240ef861ffc2
-
-<<<<<<< HEAD
-=======
 
 #tilt gar mellan 0 - -90 grader vertikalt
 
@@ -85,7 +41,10 @@ urlcam2 = 'http://169.254.135.93/axis-cgi/com/ptz.cgi?'
 #tilt1 = float(textarray[1].split('=')[1])
 #Beräkna
 def getB(S, tilt1):
-    B = (S - 1.6) / math.sin(tilt1)
+    if tilt1 != 0:
+        B = (S - 1.6) / math.sin(tilt1)
+    else:
+            B = (S - 1.6)
     return B
 
 # Beräkna pan2
@@ -113,37 +72,47 @@ def move() :
     r = requests.get(urlcam2+"tilt=-"+tilt2)
     r = requests.get(urlcam2+"pan=-"+pan2)
 #Innan
+#K1: pan 127.51, tilt 0. K2: pan -126, tilt -6.2625
+
 def calibrate() :
     r1 =requests.get(urlcam1+"query=position")
     text1 = r1.text
-    textarray = text.splitlines()
-    pan10 = float(textarray[0].split('=')[1])
-    tilt10 = float(textarray[1].split('=')[1])
-
+    textarray = text1.splitlines()
+    #pan10 = float(textarray[0].split('=')[1])
+    #tilt10 = float(textarray[1].split('=')[1])
+    pan10 = 127.51
+    pan20 = -126
+    tilt10 = 0
+    tilt20 = -6.2625
     r2 =requests.get(urlcam2+"query=position")
-    text1 = r2.text
-    textarray = text.splitlines()
-    pan20 = float(textarray[0].split('=')[1])
-    tilt20 = float(textarray[1].split('=')[1])
+    text2 = r2.text
+    textarray2 = text2.splitlines()
+    #pan20 = float(textarray2[0].split('=')[1])
+    #tilt20 = float(textarray2[1].split('=')[1])
+    #print ("kamera 1: ","pan ",pan10," tilt ",tilt10,"kamera 2 ","pan ",pan20," tilt ",tilt20,)
 
-S = 1.3
-R = 0.12
+    r = requests.get(urlcam1+"tilt="+str(tilt10))
+    r = requests.get(urlcam1+"pan="+str(pan10))
+    r = requests.get(urlcam2+"tilt="+str(tilt20))
+    r = requests.get(urlcam2+"pan="+str(pan20))
+S = 1.8
+R = 1.2
 
 calibrate()
 while 1!=0 :
+
     print("Bestäm pan")
     pan1 = input()
-    #pan1 = "32"
+    #pan1 = "110"
     print ("Bestäm tilt")
     tilt1= input()
-    #tilt1 = "64"
+    #tilt1 = "0"
     print("du har valt "+pan1+" och "+ tilt1)
     pan1 = Decimal(pan1)
     tilt1 = Decimal(tilt1)
     B = getB(S,tilt1)
     pan2  = getPan2(R,pan1,tilt1,B)
     tilt2 = getTilt2(R,pan1,tilt1,B,S)
+    print(pan2, tilt2)
     move()
     continue
->>>>>>> abc6c5edde5c1537e1a2eeb984a49965c672a64d
->>>>>>> 22172f015a561998fa0930e4c62947221a7346a2
