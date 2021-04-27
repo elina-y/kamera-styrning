@@ -8,11 +8,11 @@ import time
 #greeting = tk.Label(text="Hello, Tkinter")
 #greeting.pack()
 #captureStor = cv2.VideoCapture('rtsp://root.pass@169.254.203.231/axis-media/media.amp')
-captureStor = cv2.VideoCapture('rtsp://wowzaec2demo.streamlock.net/vod/mp4:BigBuckBunny_115k.mov')
+captureStor = cv2.VideoCapture('http://169.254.203.231')
 
 
 class App:
-    def __init__(self, window, window_title, video_source1='rtsp://wowzaec2demo.streamlock.net/vod/mp4:BigBuckBunny_115k.mov', video_source2='rtsp://wowzaec2demo.streamlock.net/vod/mp4:BigBuckBunny_115k.mov'):
+    def __init__(self, window, window_title, video_source1='rtsp://root.pass@169.254.203.231/axis-media/media.amp', video_source2='rtsp://root.pass@169.254.135.93/axis-media/media.amp'):
         self.window = window
         self.window.title(window_title)
         self.video_source1 = video_source1
@@ -36,7 +36,7 @@ class App:
         #self.btn_snapshot.pack(anchor=tk.CENTER, expand=True)
 
          # After it is called once, the update method will be automatically called every delay milliseconds
-        self.delay = 15
+        self.delay = 5
         self.update()
 
         self.window.mainloop()
