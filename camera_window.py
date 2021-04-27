@@ -9,10 +9,12 @@ import time
 #greeting.pack()
 #captureStor = cv2.VideoCapture('rtsp://root.pass@169.254.203.231/axis-media/media.amp')
 captureStor = cv2.VideoCapture('rtsp://wowzaec2demo.streamlock.net/vod/mp4:BigBuckBunny_115k.mov')
+kameraLiten='rtsp://wowzaec2demo.streamlock.net/vod/mp4:BigBuckBunny_115k.mov'
+kameraStor='rtsp://wowzaec2demo.streamlock.net/vod/mp4:BigBuckBunny_115k.mov'
 
 
 class App:
-    def __init__(self, window, window_title, video_source1='rtsp://wowzaec2demo.streamlock.net/vod/mp4:BigBuckBunny_115k.mov', video_source2='rtsp://wowzaec2demo.streamlock.net/vod/mp4:BigBuckBunny_115k.mov'):
+    def __init__(self, window, window_title, video_source1=kameraLiten, video_source2=kameraStor):
         self.window = window
         self.window.title(window_title)
         self.video_source1 = video_source1
@@ -23,8 +25,8 @@ class App:
 
 
          # Create a canvas that can fit the above video source size
-        self.canvas1 = tk.Canvas(window, width=self.vid1.width, height=self.vid1.height)
-        self.canvas2 = tk.Canvas(window, width=self.vid1.width, height=self.vid1.height)
+        self.canvas1 = tk.Canvas(window, width=600, height=400)
+        self.canvas2 = tk.Canvas(window, width=600, height=400)
         self.canvas1.pack(padx=5, pady=10, side="left")
         self.canvas2.pack(padx=5, pady=60, side="left")
 
@@ -36,7 +38,7 @@ class App:
         #self.btn_snapshot.pack(anchor=tk.CENTER, expand=True)
 
          # After it is called once, the update method will be automatically called every delay milliseconds
-        self.delay = 15
+        self.delay = 5
         self.update()
 
         self.window.mainloop()
@@ -91,8 +93,8 @@ class MyVideoCapture:
 
              ret1, frame1 = self.vid1.read()
              ret2, frame2 = self.vid2.read()
-             #frame1 = cv2.resize(frame1, (500, 500))
-             #frame2 = cv2.resize(frame2, (500, 500))
+             frame1 = cv2.resize(frame1, (600, 400))
+             frame2 = cv2.resize(frame2, (600, 400))
              if ret1 and ret2:
                  # Return a boolean success flag and the current frame converted to BGR
                  return ret1, cv2.cvtColor(frame1, cv2.COLOR_BGR2RGB), ret2, cv2.cvtColor(frame2, cv2.COLOR_BGR2RGB)
