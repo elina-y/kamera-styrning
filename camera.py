@@ -1,3 +1,4 @@
+
 import requests
 import math
 import sys
@@ -92,11 +93,32 @@ def getTilt2 (R, pan1, tilt1, B, S):
 def move() :
     r = requests.get(urlcam1+"tilt="+str(tilt1))
     r = requests.get(urlcam1+"pan="+str(pan1))
-    r = requests.get(urlcam2+"tilt="+tilt2)
-    r = requests.get(urlcam2+"pan="+pan2)
+    r = requests.get(urlcam2+"tilt=-"+tilt2)
+    r = requests.get(urlcam2+"pan=-"+pan2)
 #Innan
 #K1: pan 127.51, tilt 0. K2: pan -126, tilt -6.2625
 
+def calibrate() :
+    r1 =requests.get(urlcam1+"query=position")
+    text1 = r1.text
+    textarray = text1.splitlines()
+    #pan10 = float(textarray[0].split('=')[1])
+    #tilt10 = float(textarray[1].split('=')[1])
+    pan10 = 127.51
+    pan20 = -126
+    tilt10 = 0
+    tilt20 = -6.2625
+    r2 =requests.get(urlcam2+"query=position")
+    text2 = r2.text
+    textarray2 = text2.splitlines()
+    #pan20 = float(textarray2[0].split('=')[1])
+    #tilt20 = float(textarray2[1].split('=')[1])
+    #print ("kamera 1: ","pan ",pan10," tilt ",tilt10,"kamera 2 ","pan ",pan20," tilt ",tilt20,)
+
+    r = requests.get(urlcam1+"tilt="+str(tilt10))
+    r = requests.get(urlcam1+"pan="+str(pan10))
+    r = requests.get(urlcam2+"tilt="+str(tilt20))
+    r = requests.get(urlcam2+"pan="+str(pan20))
 S = 1.8
 R = 1.2
 pan10 = -127.51
@@ -113,10 +135,14 @@ while 1!=0 :
 
     print ("Bestäm tilt") #input exit om du vill stänga
     tilt1= input()
+<<<<<<< HEAD
+    #tilt1 = "0"
+=======
     #tilt1 = "30"
     #if(input() == "exit")
     #    sys.exit()
 
+>>>>>>> 63414d4d135a19d9999d7cb1f32cb8e83212be47
     print("du har valt "+pan1+" och "+ tilt1)
     pan1 = Decimal(pan1)
     tilt1 = Decimal(tilt1)
