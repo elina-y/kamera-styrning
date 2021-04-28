@@ -135,19 +135,24 @@ tilt20 = -6.2625
 calibrate()
 while 1!=0 :
 
-    print("Bestäm pan, input exit om du vill stänga")
+    print("Bestäm pan")
     pan1 = input()
     #pan1 = "120"
 
-    print ("Bestäm tilt,input exit om du vill stänga")
+    print ("Bestäm tilt") #input exit om du vill stänga
     tilt1= input()
 
     #tilt1 = "0"
     if input() == "Calibrate":
         calibrate()
     #tilt1 = "30"
+<<<<<<< HEAD
 #    if input() == "exit":
 #        sys.exit()
+=======
+    #if(input() == "exit")
+    #    sys.exit()
+>>>>>>> af52761acae960a2bc50bf1a900e5900f96cf243
 
     print("du har valt "+pan1+" och "+ tilt1)
     pan1 = Decimal(pan1)
