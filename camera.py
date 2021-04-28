@@ -72,9 +72,14 @@ def getB(S, tilt1):
 
 # Beräkna pan2
 def getPan2 (R, pan1, tilt1, B):
+
     Rtak = B*math.cos(math.radians(tilt1))
     Ctak = math.sqrt(((math.pow(R,2)) + ((math.pow(Rtak,2)) - 2 * R * Rtak * math.cos(math.radians(pan1)))))
     pan2 = math.degrees(math.asin(Rtak*(math.sin(math.radians(pan1))/Ctak)))+126
+
+    Rtak = B*math.cos(tilt1)
+    Ctak = math.sqrt((R*R) + (Rtak*Rtak) - 2 * R * Rtak * math.cos(pan1))
+    pan2 = math.asin(Rtak * (math.sin(pan1) / Ctak))
     return str(pan2)
 
 # Beräkna tilt2
@@ -83,11 +88,11 @@ def getTilt2 (R, pan1, tilt1, B, S):
     Cvagg = math.sqrt((math.pow(R,2)) + (math.pow(Rvagg,2)) - 2 * R * Rvagg * math.cos(math.radians(tilt1)))
     tilt2 = math.degrees(math.asin(Rvagg * (math.sin(math.radians(tilt1)) / Cvagg)))
     if (tilt2 != 90):
-        return str(tilt2-tilt20)
+        return str(tilt2)
     else:
         C90 = math.sqrt(B*B - R*R)
         tilt2 = math.degrees(math.asin(S - C90))
-        return str(tilt2-tilt20)
+        return str(tilt2)
 
 def move() :
     r = requests.get(urlcam1+"tilt="+str(tilt1))
