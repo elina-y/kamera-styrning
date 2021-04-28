@@ -3,6 +3,9 @@ import requests
 import math
 import sys
 from decimal import Decimal
+import urllib3
+from requests.auth import HTTPDigestAuth
+
 global pan1
 global pan2
 global tilt1
@@ -14,7 +17,9 @@ global tilt20
 global pan20
 global tilt10
 global pan10
+global auth
 
+#Testa med httpdigest. Har skapat en global vid namn auth för detta!
 
 #tilt gar mellan 0 - -90 grader vertikalt
 
@@ -33,7 +38,8 @@ global pan10
 #ip för kamerorna
 urlcam1 = 'http://169.254.203.231/axis-cgi/com/ptz.cgi?'
 urlcam2 = 'http://169.254.135.93/axis-cgi/com/ptz.cgi?'
-
+r=requests.get(url,auth=HTTPDigestAuth(’root’,’pass’))
+auth = HTTPDigestAuth(’root’,’pass’)
 #print(req.text)
 #req = requests.get(urlcam1+"query=position")
 #text = req.text
@@ -42,7 +48,7 @@ urlcam2 = 'http://169.254.135.93/axis-cgi/com/ptz.cgi?'
 #tilt1 = float(textarray[1].split('=')[1])
 #Beräkna
 def calibrate() :
-    r1 =requests.get(urlcam1+"query=position")
+    r1 =requests.get(urlcam1+"query=position",auth)
     text1 = r1.text
     textarray = text1.splitlines()
     #pan10 = float(textarray[0].split('=')[1])
@@ -51,7 +57,7 @@ def calibrate() :
     pan20 = -126
     tilt10 = 0
     tilt20 = -6.2625
-    r2 =requests.get(urlcam2+"query=position")
+    r2 =requests.get(urlcam2+"query=position",auth)
     text2 = r2.text
     textarray2 = text2.splitlines()
     #pan20 = float(textarray2[0].split('=')[1])
@@ -75,14 +81,14 @@ def getB(S, tilt1):
 def getPan2 (R, pan1, tilt1, B):
     Rtak = B*math.cos(math.radians(tilt1))
     Ctak = math.sqrt(((math.pow(R,2)) + ((math.pow(Rtak,2)) - 2 * R * Rtak * math.cos(math.radians(pan1)))))
-    pan2 = math.degrees(math.asin(Rtak*(math.sin(math.radians(pan1))/Ctak)))+126
+    pan2 = math.degrees(math.asin(Rtak*(math.sin(math.radians(pan1))/Ctak)))-pan20
     return str(pan2)
 
 # Beräkna tilt2
 def getTilt2 (R, pan1, tilt1, B, S):
     Rvagg = B*math.cos(math.radians(pan1))
     Cvagg = math.sqrt((math.pow(R,2)) + (math.pow(Rvagg,2)) - 2 * R * Rvagg * math.cos(math.radians(tilt1)))
-    tilt2 = math.degrees(math.asin(Rvagg * (math.sin(math.radians(tilt1)) / Cvagg)))
+    tilt2 = math.degrees(math.asin(Rvagg * (math.sin(math.radians(tilt1)) / Cvagg)))-tilt20
     if (tilt2 != 90):
         return str(tilt2-tilt20)
     else:
@@ -135,14 +141,14 @@ while 1!=0 :
 
     print ("Bestäm tilt,input exit om du vill stänga")
     tilt1= input()
-<<<<<<< HEAD
-    #tilt1 = "0"
-=======
-    #tilt1 = "30"
-    if(input() = "exit")
-        sys.exit()
 
->>>>>>> 63414d4d135a19d9999d7cb1f32cb8e83212be47
+    #tilt1 = "0"
+    if input() == "Calibrate":
+        calibrate()
+    #tilt1 = "30"
+#    if input() == "exit":
+#        sys.exit()
+
     print("du har valt "+pan1+" och "+ tilt1)
     pan1 = Decimal(pan1)
     tilt1 = Decimal(tilt1)
