@@ -45,7 +45,7 @@ class App:
         self.label_pan1 = tk.Label(window, text="Pan")
         self.label_pan1.grid(row=1, column=0, sticky=tk.E, padx=40)
 
-        self.scale_tilt1 = tk.Scale(window, from_=0, to=90, orient=tk.VERTICAL)
+        self.scale_tilt1 = tk.Scale(window, from_=0, to=90, orient=tk.VERTICAL, command=self.tilt("tilt1"))
         self.scale_tilt1.grid(padx=5, pady=10, row=1, column=1, sticky=tk.W, rowspan=2)
         self.label_tilt1 = tk.Label(window, text="Tilt")
         self.label_tilt1.grid(row=1, column=1, sticky=tk.W, padx=50, rowspan=2)
@@ -94,6 +94,10 @@ class App:
          self.label_tilt2.grid()
          self.button_calibrate.grid()
          self.button_reset.grid_remove()
+
+    def tilt(value, title_scale):
+        print(value)
+        print(title_scale)
 
     def update(self):
          # Get a frame from the video source
