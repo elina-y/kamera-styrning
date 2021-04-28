@@ -29,8 +29,8 @@ global pan10
 # MAC LILLA 00408CB977FF
 # Mac STORA ACCC8ED91461
 #ip för kamerorna
-urlcam2 = 'http://169.254.203.231/axis-cgi/com/ptz.cgi?'
-urlcam1 = 'http://169.254.135.93/axis-cgi/com/ptz.cgi?'
+urlcam1 = 'http://169.254.203.231/axis-cgi/com/ptz.cgi?'
+urlcam2 = 'http://169.254.135.93/axis-cgi/com/ptz.cgi?'
 
 #print(req.text)
 #req = requests.get(urlcam1+"query=position")
