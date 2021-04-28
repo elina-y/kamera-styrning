@@ -1,6 +1,7 @@
 
 import requests
 import math
+import sys
 from decimal import Decimal
 global pan1
 global pan2
@@ -21,7 +22,7 @@ global pan10
 # S = kamerornas hojd från golvet (m)
 # pan1 och tilt1 bestäms av användaren
 # B = avstandet från kameran till fokuspunkten
-#VIKTIGT: skriv "import math" i main ❤
+#VIKTIGT: skriv "import math" i main <3
 
 #todo:
 #1. fixa hämta ip automatiskt.
@@ -128,13 +129,20 @@ tilt20 = -6.2625
 calibrate()
 while 1!=0 :
 
-    print("Bestäm pan")
+    print("Bestäm pan, input exit om du vill stänga")
     pan1 = input()
     #pan1 = "120"
 
-    print ("Bestäm tilt")
+    print ("Bestäm tilt,input exit om du vill stänga")
     tilt1= input()
+<<<<<<< HEAD
     #tilt1 = "0"
+=======
+    #tilt1 = "30"
+    if(input() = "exit")
+        sys.exit()
+
+>>>>>>> 63414d4d135a19d9999d7cb1f32cb8e83212be47
     print("du har valt "+pan1+" och "+ tilt1)
     pan1 = Decimal(pan1)
     tilt1 = Decimal(tilt1)
