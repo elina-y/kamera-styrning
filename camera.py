@@ -20,6 +20,14 @@ global pan10
 global auth
 
 #Testa med httpdigest. Har skapat en global vid namn auth för detta!
+#r=requests.get(url,auth=HTTPDigestAuth(’root’,’pass’))
+#auth = HTTPDigestAuth(’root’,’pass’)
+#print(req.text)
+#req = requests.get(urlcam1+"query=position")
+#text = req.text
+#textarray = text.splitlines()
+#pan1 = float(textarray[0].split('=')[1])
+#tilt1 = float(textarray[1].split('=')[1])
 
 #tilt gar mellan 0 - -90 grader vertikalt
 
@@ -36,15 +44,20 @@ global auth
 #ip för kamerorna
 urlcam1 = 'http://169.254.203.231/axis-cgi/com/ptz.cgi?'
 urlcam2 = 'http://169.254.135.93/axis-cgi/com/ptz.cgi?'
-#r=requests.get(url,auth=HTTPDigestAuth(’root’,’pass’))
-#auth = HTTPDigestAuth(’root’,’pass’)
-#print(req.text)
-#req = requests.get(urlcam1+"query=position")
-#text = req.text
-#textarray = text.splitlines()
-#pan1 = float(textarray[0].split('=')[1])
-#tilt1 = float(textarray[1].split('=')[1])
 #Beräkna
+
+#Denna ska kopplas till calibrate-knappen och ersätta andra calib funken
+def newCalibration() :
+    q = "query=position"
+    r1 = requests.get(urlcam1+q)
+    r2 = requests.get(urlcam2+q)
+    t1 = r1.text.splitlines()
+    t2 = r2.text.splitlines()
+    pan1n = float(t1[0].split('=')[1])
+    tilt1n = float(t1[1].split('=')[1])
+    pan2n = float(t2[0].split('=')[1])
+    tilt2n = float(t2[1].split('=')[1])
+
 def calibrate() :
     r1 =requests.get(urlcam1+"query=position")
     text1 = r1.text
@@ -73,7 +86,7 @@ def getB(h, tilt1, personHeight):
     if tilt1 != 0:
         B = (h - personHeight) / math.sin(math.radians(tilt1))
     else:
-            B = 4
+            B = h
     return B
 
 # Beräkna pan2
@@ -84,17 +97,20 @@ def getPan2 (R, pan1, tilt1, B):
     pan2 = math.asin(Rtak*(math.sin(math.radians(pan1))/Ctak))
     print("Rtak",Rtak)
     print("pan2", math.degrees(pan2))
-
-    ss1=math.sin(math.radians(pan1))/Ctak
-    ss2=math.sin(pan2)/Rtak
-    ss3= math.sin(math.radians(math.pi-math.radians(pan1)-pan2))/R
     print("ss1",ss1,"ss2",ss2,"ss3",ss3)
-    print("pan2",math.degrees(pan2))
-    if (ss1 == ss2) :
+    if checksine(Rtak,R,Ctak,pan1,pan2) :
         return math.degrees(pan2)
     else:
-        return 180+math.degrees(pan2)
+        return 180+math.degrees(pan2))
+
+def checksine(Rtak,R,Ctak,pan1,pan2):
+    ss1= math.sin(math.radians(pan1))/Ctak
+    ss2= math.sin(pan2)/Rtak
+    ss3= math.sin(math.pi-math.radians(pan1)-pan2)/R
+    return ss1 == ss2
+
 # Beräkna tilt2
+
 def getTilt2 (R, pan1, tilt1, B, h):
     Rvagg = B*math.cos(math.radians(pan1))
     Cvagg = math.sqrt((math.pow(R,2)) + (math.pow(Rvagg,2)) - 2 * R * Rvagg * math.cos(math.radians(tilt1)))
@@ -102,7 +118,6 @@ def getTilt2 (R, pan1, tilt1, B, h):
     if (tilt2 != 90):
         return tilt2
     else:
-        print(hej)
         C90 = math.sqrt(B*B - R*R)
         tilt2 = math.degrees(math.asin(h - C90))
         return tilt2
