@@ -11,7 +11,7 @@ global pan2
 global tilt1
 global tilt2
 global R
-global S
+global h
 global B
 global tilt20
 global pan20
@@ -68,44 +68,57 @@ def calibrate() :
     r = requests.get(urlcam2+"pan="+str(pan20))
 
 
-def getB(S, tilt1):
+def getB(h, tilt1, personHeight):
     #B är längden till punkten vi vill kolla på, S höjden över golvet
     if tilt1 != 0:
-        B = (S - 1.6) / math.sin(math.radians(tilt1))
+        B = (h - personHeight) / math.sin(math.radians(tilt1))
     else:
-            B = (S - 1.6)
+            B = 4
     return B
 
 # Beräkna pan2
 def getPan2 (R, pan1, tilt1, B):
     Rtak = B*math.cos(math.radians(tilt1))
-    Ctak = math.sqrt(((math.pow(R,2)) + ((math.pow(Rtak,2)) - 2 * R * Rtak * math.cos(math.radians(pan1)))))
-    pan2 = math.degrees(math.asin(Rtak*(math.sin(math.radians(pan1))/Ctak)))
-    return pan2
+    Ctak = math.sqrt((math.pow(R,2)) + ((math.pow(Rtak,2)) - 2 * R * Rtak * math.cos(math.radians(pan1))))
+    print("Ctak",Ctak)
+    pan2 = math.asin(Rtak*(math.sin(math.radians(pan1))/Ctak))
+    print("Rtak",Rtak)
+    print("pan2", math.degrees(pan2))
 
+    ss1=math.sin(math.radians(pan1))/Ctak
+    ss2=math.sin(pan2)/Rtak
+    ss3= math.sin(math.radians(math.pi-math.radians(pan1)-pan2))/R
+    print("ss1",ss1,"ss2",ss2,"ss3",ss3)
+    print("pan2",math.degrees(pan2))
+    if (ss1 == ss2) :
+        return math.degrees(pan2)
+    else:
+        return 180+math.degrees(pan2)
 # Beräkna tilt2
-def getTilt2 (R, pan1, tilt1, B, S):
+def getTilt2 (R, pan1, tilt1, B, h):
     Rvagg = B*math.cos(math.radians(pan1))
     Cvagg = math.sqrt((math.pow(R,2)) + (math.pow(Rvagg,2)) - 2 * R * Rvagg * math.cos(math.radians(tilt1)))
-    tilt2 = math.degrees(math.asin(Rvagg * (math.sin(math.radians(tilt1)) / Cvagg)))-tilt20
+    tilt2 = math.degrees(math.asin(Rvagg * (math.sin(math.radians(tilt1)) / Cvagg)))
     if (tilt2 != 90):
-        return str(tilt2-tilt20)
+        return tilt2
     else:
+        print(hej)
         C90 = math.sqrt(B*B - R*R)
-        tilt2 = math.degrees(math.asin(S - C90))
-        return str(tilt2-tilt20)
+        tilt2 = math.degrees(math.asin(h - C90))
+        return tilt2
 
 def move() :
-    r = requests.get(urlcam1+"tilt="+str(tilt1))
-    r = requests.get(urlcam1+"pan="+str(pan1))
-    r = requests.get(urlcam2+"tilt="+"0")
-    r = requests.get(urlcam2+"pan="+pan2)
+    #r = requests.get(urlcam1+"tilt="+str(tilt1))
+    #r = requests.get(urlcam1+"pan="+str(pan1))
+    r = requests.get(urlcam2+"tilt=-"+str(tilt2))
+    r = requests.get(urlcam2+"pan="+str(pan2))
 #Innan
 #K1: pan 127.51, tilt 0. K2: pan -126, tilt -6.2625
 
-
-S = 1.8
-R = 1.2
+B=0
+h = 1.07
+R = 1.7
+personHeight=0.50
 pan10 = -127.51
 pan20 = -126
 tilt10 = 0
@@ -114,22 +127,28 @@ tilt20 = -6.2625
 #calibrate()
 
 while 1!=0 :
+    r1 =requests.get(urlcam1+"query=position")
+    text1 = r1.text
+    textarray = text1.splitlines()
+    pan1 = float(textarray[0].split('=')[1])
+    #tilt1 = math.fabs(float(textarray[1].split('=')[1]))
+    tilt1=0
 
-    print("Bestäm pan")
-    #pan1 = input() #input ges i riktiga koordinater
-    pan1 = -50
+    #print("Bestäm pan")
+    #pan1 = float(input()) #input ges i riktiga koordinater
 
-    print ("Bestäm tilt") #input exit om du vill stänga
-    tilt1= 0 #input ges i riktiga koordinater
+    #print ("Bestäm tilt") #input exit om du vill stänga
+    #tilt1= float(input()) #input ges i riktiga koordinater
+    #pan1 = -171.93
+    #tilt1 = -8.11
 
-    #tilt1 = "0"
     #if input() == "Calibrate":
     #    calibrate()
 
     #print("du har valt "+pan1+" och "+ tilt1)
     #pan1 = int(pan1)
     #tilt1 = Decimal(tilt1)
-    #B = getB(S,tilt1)
+    #B = getB(h,tilt1, personHeight)
     B=4
 
     virPan1=0
@@ -144,12 +163,12 @@ while 1!=0 :
 
     if pan10>0 and pan1<0 :
         virPan1=-pan10+pan1
-
-
+    print("B",B)
+    print("virpan1",virPan1)
     virPan2  = getPan2(R,virPan1,tilt1,B)
-    pan2 = str(pan20-virPan2)
-    #tilt2 = getTilt2(R,pan1,tilt1,B,S)
-    print(pan2)
-    print(virPan2)
+    pan2 = pan20+virPan2
+    tilt2 = getTilt2(R,virPan1,tilt1,B,h)
+    print("tilt2",tilt2)
+    print("pan2",pan2)
     move()
     break
