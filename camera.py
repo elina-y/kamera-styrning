@@ -34,7 +34,7 @@ global auth
 # MAC LILLA 00408CB977FF
 # Mac STORA ACCC8ED91461
 #ip för kamerorna
-urlcam1 = 'http://169.254.203.231/axis-cgi/com/ptz.cgi?'
+urlcam1 = 'http://169.254.203.230/axis-cgi/com/ptz.cgi?'
 urlcam2 = 'http://169.254.135.93/axis-cgi/com/ptz.cgi?'
 #r=requests.get(url,auth=HTTPDigestAuth(’root’,’pass’))
 #auth = HTTPDigestAuth(’root’,’pass’)
@@ -73,7 +73,7 @@ def getB(h, tilt1, personHeight):
     if tilt1 != 0:
         B = (h - personHeight) / math.sin(math.radians(tilt1))
     else:
-            B = 4
+            B = 1.7
     return B
 
 # Beräkna pan2
@@ -85,26 +85,37 @@ def getPan2 (R, pan1, tilt1, B):
     print("Rtak",Rtak)
     print("pan2", math.degrees(pan2))
 
-    ss1=math.sin(math.radians(pan1))/Ctak
-    ss2=math.sin(pan2)/Rtak
-    ss3= math.sin(math.radians(math.pi-math.radians(pan1)-pan2))/R
+    ss1=round(math.sin(math.radians(pan1))/Ctak,3)
+    ss2=round(math.sin(pan2)/Rtak,3)
+    ss3= round(math.sin(math.pi-math.radians(pan1)-pan2)/R,3)
     print("ss1",ss1,"ss2",ss2,"ss3",ss3)
     print("pan2",math.degrees(pan2))
-    if (ss1 == ss2) :
+    if pan1>90 or (ss1 == ss3) :
         return math.degrees(pan2)
     else:
-        return 180+math.degrees(pan2)
+        return 180-math.degrees(pan2)
 # Beräkna tilt2
 def getTilt2 (R, pan1, tilt1, B, h):
-    Rvagg = B*math.cos(math.radians(pan1))
-    Cvagg = math.sqrt((math.pow(R,2)) + (math.pow(Rvagg,2)) - 2 * R * Rvagg * math.cos(math.radians(tilt1)))
+    if(pan1>90):
+        Rvagg = B*math.cos(math.radians(pan1-90))
+        Cvagg = math.sqrt((math.pow(R,2)) + (math.pow(Rvagg,2)) - 2 * R * Rvagg * math.cos(math.radians(180-tilt1)))
+
+    else:
+        Rvagg = B*math.cos(math.radians(pan1))
+        Cvagg = math.sqrt((math.pow(R,2)) + (math.pow(Rvagg,2)) - 2 * R * Rvagg * math.cos(math.radians(tilt1)))
+    print("Rvagg",Rvagg)
+    print("Cvagg",Cvagg)
+
     tilt2 = math.degrees(math.asin(Rvagg * (math.sin(math.radians(tilt1)) / Cvagg)))
-    if (tilt2 != 90):
+    print("tilt2 vid getTilt",tilt2)
+    if (math.fabs(tilt2) <70 ):
         return tilt2
     else:
-        print(hej)
+        print("hej")
         C90 = math.sqrt(B*B - R*R)
-        tilt2 = math.degrees(math.asin(h - C90))
+        print("C90",C90)
+        print("h",h)
+        tilt2 = math.degrees(math.asin(0.87))
         return tilt2
 
 def move() :
@@ -116,7 +127,7 @@ def move() :
 #K1: pan 127.51, tilt 0. K2: pan -126, tilt -6.2625
 
 B=0
-h = 1.07
+h = 3.5
 R = 1.7
 personHeight=0.50
 pan10 = -127.51
@@ -131,8 +142,8 @@ while 1!=0 :
     text1 = r1.text
     textarray = text1.splitlines()
     pan1 = float(textarray[0].split('=')[1])
-    #tilt1 = math.fabs(float(textarray[1].split('=')[1]))
-    tilt1=0
+    tilt1 = math.fabs(float(textarray[1].split('=')[1]))
+    #tilt1=0
 
     #print("Bestäm pan")
     #pan1 = float(input()) #input ges i riktiga koordinater
@@ -149,7 +160,7 @@ while 1!=0 :
     #pan1 = int(pan1)
     #tilt1 = Decimal(tilt1)
     #B = getB(h,tilt1, personHeight)
-    B=4
+    B = 1.5
 
     virPan1=0
     if pan10<0 and pan1<0:
@@ -166,8 +177,9 @@ while 1!=0 :
     print("B",B)
     print("virpan1",virPan1)
     virPan2  = getPan2(R,virPan1,tilt1,B)
-    pan2 = pan20+virPan2
+    pan2 = pan20-virPan2
     tilt2 = getTilt2(R,virPan1,tilt1,B,h)
+    print("tilt1",tilt1)
     print("tilt2",tilt2)
     print("pan2",pan2)
     move()
