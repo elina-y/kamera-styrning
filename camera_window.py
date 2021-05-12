@@ -3,8 +3,7 @@ import cv2
 import PIL.ImageTk
 import PIL.Image
 import time
-global x
-global y
+
 
 #captureStor = cv2.VideoCapture('rtsp://root.pass@169.254.203.231/axis-media/media.amp')
 #captureStor = cv2.VideoCapture('http://169.254.203.231')
@@ -40,23 +39,23 @@ class App:
         #self.btn_snapshot=tk.Button(window, text="Snapshot", width=50, command=self.snapshot)
         #self.btn_snapshot.pack(anchor=tk.CENTER, expand=True)
 
-        self.scale_pan1 = tk.Scale(window, from_=-180, to=180, orient=tk.HORIZONTAL,command = self.pan1)
+        self.scale_pan1 = tk.Scale(window, from_=-180, to=180, orient=tk.HORIZONTAL)
         #self.scale_pan1.pack(anchor=tk.SE, expand=True)
         self.scale_pan1.grid(padx=6, pady=10, row=1, column=0, sticky=tk.E, rowspan=2)
         self.label_pan1 = tk.Label(window, text="Pan")
         self.label_pan1.grid(row=1, column=0, sticky=tk.E, padx=40)
 
-        self.scale_tilt1 = tk.Scale(window, from_=0, to=90, orient=tk.VERTICAL, command=self.tilt1)
+        self.scale_tilt1 = tk.Scale(window, from_=0, to=90, orient=tk.VERTICAL, command=self.tilt("tilt1"))
         self.scale_tilt1.grid(padx=5, pady=10, row=1, column=1, sticky=tk.W, rowspan=2)
         self.label_tilt1 = tk.Label(window, text="Tilt")
         self.label_tilt1.grid(row=1, column=1, sticky=tk.W, padx=50, rowspan=2)
 
-        self.scale_pan2 = tk.Scale(window, from_=-180, to=180, orient=tk.HORIZONTAL, command= self.pan2)
+        self.scale_pan2 = tk.Scale(window, from_=-180, to=180, orient=tk.HORIZONTAL)
         self.scale_pan2.grid(padx=5, pady=10, row=1, column=3, sticky=tk.E, rowspan=2)
         self.label_pan2 = tk.Label(window, text="Pan")
         self.label_pan2.grid(row=1, column=3, sticky=tk.E, padx=40)
 
-        self.scale_tilt2 = tk.Scale(window, from_=0, to=90, orient=tk.VERTICAL, command = self.tilt2)
+        self.scale_tilt2 = tk.Scale(window, from_=0, to=90, orient=tk.VERTICAL)
         self.scale_tilt2.grid(padx=5, pady=10, row=1, column=4, sticky=tk.W, rowspan=2)
         self.label_tilt2 = tk.Label(window, text="Tilt")
         self.label_tilt2.grid(row=1, column=4, sticky=tk.W, padx=50, rowspan=2)
@@ -71,11 +70,6 @@ class App:
         self.entry_distance.grid()
         self.label_distance = tk.Label(window, text="avstand")
         self.label_distance.grid()
-
-        self.label_lookHight = tk.Label(window, text ="satt hojd ", orient=tk.VERTICAL, command = self.hojd)
-        self.scale_lookHight = tk.Scale(window, from_ = 0, to=2)
-
-
 
 
 
@@ -108,17 +102,9 @@ class App:
          self.scale_pan2.grid_remove()
          self.scale_tilt2.grid_remove()
          self.label_pan2.grid_remove()
-         y = int(self.entry_hight.get())
-         x = int(self.entry_distance.get())
          self.label_tilt2.grid_remove()
-         self.label_hight.grid_remove()
-         self.entry_hight.grid_remove()
-         self.label_distance.grid_remove();
-         self.entry_distance.grid_remove()
          self.button_calibrate.grid_remove()
-         print(x,y)
          self.button_reset.grid()
-
 
     def reset(self):
          self.scale_pan2.grid()
@@ -128,25 +114,9 @@ class App:
          self.button_calibrate.grid()
          self.button_reset.grid_remove()
 
-    def tilt1(object_scale1, tiltValue1):
-        print(tiltValue1)
-
-
-    def tilt2(object_scale2, tiltValue2):
-        print(tiltValue2)
-
-
-    def pan1(object_pan, panValue):
-        print(panValue)
-
-    def pan2(object_pan2, panValue2):
-        print(panValue2)
-
-
-    def hojd(object_hojd, hojdValue):
-        print(hojdValue)
-
-
+    def tilt(value, title_scale):
+        print(value)
+        print(title_scale)
 
     def update(self):
          # Get a frame from the video source
