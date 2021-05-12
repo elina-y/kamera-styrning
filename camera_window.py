@@ -6,11 +6,11 @@ import time
 
 
 #captureStor = cv2.VideoCapture('rtsp://root.pass@169.254.203.231/axis-media/media.amp')
-captureStor = cv2.VideoCapture('http://169.254.203.231')
+#captureStor = cv2.VideoCapture('http://169.254.203.231')
 
 
 class App:
-    def __init__(self, window, window_title, video_source1='rtsp://root.pass@169.254.203.231/axis-media/media.amp', video_source2='rtsp://root.pass@169.254.135.93/axis-media/media.amp'):
+    def __init__(self, window, window_title, video_source1='rtsp://wowzaec2demo.streamlock.net/vod/mp4:BigBuckBunny_115k.mov', video_source2='rtsp://wowzaec2demo.streamlock.net/vod/mp4:BigBuckBunny_115k.mov'):
         self.window = window
         self.window.title(window_title)
         self.video_source1 = video_source1
@@ -26,6 +26,8 @@ class App:
         self.canvas2 = tk.Canvas(window, width=600, height=400)
         self.canvas1.grid(padx=10, pady=10, columnspan=2, row=0, column=0)
         self.canvas2.grid(padx=10, pady=10, columnspan=2, row=0, column=3)
+
+
 
         #self.canvas1.pack(padx=5, pady=10, side="left")
         #self.canvas2.pack(padx=5, pady=60, side="left")
@@ -58,6 +60,19 @@ class App:
         self.label_tilt2 = tk.Label(window, text="Tilt")
         self.label_tilt2.grid(row=1, column=4, sticky=tk.W, padx=50, rowspan=2)
 
+
+        self.entry_hight = tk.Entry(window)
+        self.entry_hight.grid()
+        self.label_hight = tk.Label(window, text = "hojd")
+        self.label_hight.grid()
+
+        self.entry_distance = tk.Entry(window)
+        self.entry_distance.grid()
+        self.label_distance = tk.Label(window, text="avstand")
+        self.label_distance.grid()
+
+
+
         self.button_calibrate = tk.Button(window, text="Calibrate", width=7, command=self.calibrate)
         self.button_calibrate.grid(row=1,column=2)
         self.button_reset = tk.Button(window, text="Reset", width=7, command=self.reset)
@@ -68,6 +83,12 @@ class App:
         self.update()
 
         self.window.mainloop()
+
+    def StartValues(x, y):
+        y = int(self.entry_hight.get())
+        x = int(self.entry_distance.get())
+        return x,y;
+
 
     def snapshot(self):
          # Get a frame from the video source
@@ -123,7 +144,7 @@ class MyVideoCapture:
              raise ValueError("Unable to open video source", video_source1)
 
          # Get video source width and height
-         print("Nu är jag i MyvideoCapture")
+         print("Nu ar jag i MyvideoCapture")
          self.width = self.vid1.get(cv2.CAP_PROP_FRAME_WIDTH)
          self.height = self.vid1.get(cv2.CAP_PROP_FRAME_HEIGHT)
 
