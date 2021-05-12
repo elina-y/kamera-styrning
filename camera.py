@@ -20,8 +20,8 @@ global pan10
 global auth
 
 #Testa med httpdigest. Har skapat en global vid namn auth för detta!
-#r=requests.get(url,auth=HTTPDigestAuth(’root’,’pass’))
-#auth = HTTPDigestAuth(’root’,’pass’)
+#r=requests.get(url,auth=HTTPDigestAuth('root','pass'))
+auth = HTTPDigestAuth('root','pass')
 #print(req.text)
 #req = requests.get(urlcam1+"query=position")
 #text = req.text
@@ -86,7 +86,8 @@ def getB(h, tilt1, personHeight):
     if tilt1 != 0:
         B = (h - personHeight) / math.sin(math.radians(tilt1))
     else:
-            B = 1.7
+            B = 4
+    print("B",B)
     return B
 
 # Beräkna pan2
@@ -110,7 +111,10 @@ def getPan2 (R, pan1, tilt1, B):
 # Beräkna tilt2
 
 def getTilt2 (R, pan1, tilt1, B, h):
-    if(pan1>90 and pan1 < 180):
+    if(pan1>80 and pan1<100 ):
+        Rvagg=B*math.sin(math.radians(tilt1))
+        Cvagg=math.sqrt(math.pow(h,2)+math.pow(R,2))
+    elif(pan1>90 and pan1 < 135):
         Rvagg = B*math.cos(math.radians(pan1-90))
         Cvagg = math.sqrt((math.pow(R,2)) + (math.pow(Rvagg,2)) - 2 * R * Rvagg * math.cos(math.radians(180-tilt1)))
 
@@ -122,7 +126,7 @@ def getTilt2 (R, pan1, tilt1, B, h):
 
     tilt2 = math.degrees(math.asin(Rvagg * (math.sin(math.radians(tilt1)) / Cvagg)))
     print("tilt2 vid getTilt",tilt2)
-    if (math.fabs(tilt2) <80):
+    if (math.fabs(tilt2) <65):
         return tilt2
     else:
         print("hej")
@@ -140,15 +144,15 @@ def getTilt2 (R, pan1, tilt1, B, h):
 def move() :
     #r = requests.get(urlcam1+"tilt="+str(tilt1))
     #r = requests.get(urlcam1+"pan="+str(pan1))
-    r = requests.get(urlcam2+"tilt=-"+str(tilt2))
-    r = requests.get(urlcam2+"pan="+str(pan2))
+    r = requests.get(urlcam2+"tilt=-"+str(tilt2), auth=HTTPDigestAuth('root','pass'))
+    r = requests.get(urlcam2+"pan="+str(pan2), auth=HTTPDigestAuth('root','pass'))
 #Innan
 #K1: pan 127.51, tilt 0. K2: pan -126, tilt -6.2625
 
 B=0
-h = 1.07
+h = 2.1
 R = 1.7
-personHeight=0.80
+personHeight=0.50
 pan10 = -127.51
 pan20 = -126
 tilt10 = 0
@@ -157,7 +161,7 @@ tilt20 = -6.2625
 #calibrate()
 
 while 1!=0 :
-    r1 =requests.get(urlcam1+"query=position")
+    r1 =requests.get(urlcam1+"query=position", auth=HTTPDigestAuth('root','pass'))
     text1 = r1.text
     textarray = text1.splitlines()
     pan1 = float(textarray[0].split('=')[1])
@@ -179,7 +183,7 @@ while 1!=0 :
     #pan1 = int(pan1)
     #tilt1 = Decimal(tilt1)
     #B = getB(h,tilt1, personHeight)
-    B = getB(h, tilt1, personHeight)
+    B =  getB(h, tilt1, personHeight)
 
     virPan1=0
     if pan10<0 and pan1<0:
