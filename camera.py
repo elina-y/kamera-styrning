@@ -19,15 +19,9 @@ global tilt10
 global pan10
 global auth
 
-#Testa med httpdigest. Har skapat en global vid namn auth för detta!
-#r=requests.get(url,auth=HTTPDigestAuth('root','pass'))
+
 auth = HTTPDigestAuth('root','pass')
-#print(req.text)
-#req = requests.get(urlcam1+"query=position")
-#text = req.text
-#textarray = text.splitlines()
-#pan1 = float(textarray[0].split('=')[1])
-#tilt1 = float(textarray[1].split('=')[1])
+
 
 #tilt gar mellan 0 - -90 grader vertikalt
 
@@ -35,7 +29,7 @@ auth = HTTPDigestAuth('root','pass')
 # S = kamerornas hojd från golvet (m)
 # pan1 och tilt1 bestäms av användaren
 # B = avstandet från kameran till fokuspunkten
-#VIKTIGT: skriv "import math" i main <3
+
 
 
 
@@ -58,27 +52,23 @@ def newCalibration() :
     pan2n = float(t2[0].split('=')[1])
     tilt2n = float(t2[1].split('=')[1])
 
-def calibrate() :
-    r1 =requests.get(urlcam1+"query=position")
-    text1 = r1.text
-    textarray = text1.splitlines()
-    #pan10 = float(textarray[0].split('=')[1])
-    #tilt10 = float(textarray[1].split('=')[1])
-    pan10 = -127.51
-    pan20 = -126
-    tilt10 = 0
-    tilt20 = -6.2625
-    r2 =requests.get(urlcam2+"query=position")
-    text2 = r2.text
-    textarray2 = text2.splitlines()
-    #pan20 = float(textarray2[0].split('=')[1])
-    #tilt20 = float(textarray2[1].split('=')[1])
-    print ("kamera 1: ","pan ",pan10," tilt ",tilt10,"kamera 2 ","pan ",pan20," tilt ",tilt20,)
+#def calibrate() :
+    #r1 =requests.get(urlcam1+"query=position")
+    #text1 = r1.text
+    #textarray = text1.splitlines()
+    #pan10 = -127.51
+    #pan20 = -126
+    #tilt10 = 0
+    #tilt20 = -6.2625
+    #r2 =requests.get(urlcam2+"query=position")
+    #text2 = r2.text
+    #textarray2 = text2.splitlines()
+    #print ("kamera 1: ","pan ",pan10," tilt ",tilt10,"kamera 2 ","pan ",pan20," tilt ",tilt20,)
 
-    r = requests.get(urlcam1+"tilt="+str(tilt10))
-    r = requests.get(urlcam1+"pan="+str(pan10))
-    r = requests.get(urlcam2+"tilt="+str(tilt20))
-    r = requests.get(urlcam2+"pan="+str(pan20))
+    #r = requests.get(urlcam1+"tilt="+str(tilt10))
+    #r = requests.get(urlcam1+"pan="+str(pan10))
+    #r = requests.get(urlcam2+"tilt="+str(tilt20))
+    #r = requests.get(urlcam2+"pan="+str(pan20))
 
 
 def getB(h, tilt1, personHeight):
@@ -142,23 +132,18 @@ def getTilt2 (R, pan1, tilt1, B, h):
 
 
 def move() :
-    #r = requests.get(urlcam1+"tilt="+str(tilt1))
-    #r = requests.get(urlcam1+"pan="+str(pan1))
     r = requests.get(urlcam2+"tilt=-"+str(tilt2), auth=HTTPDigestAuth('root','pass'))
     r = requests.get(urlcam2+"pan="+str(pan2), auth=HTTPDigestAuth('root','pass'))
-#Innan
-#K1: pan 127.51, tilt 0. K2: pan -126, tilt -6.2625
 
 B=0
-h = 2.1
+h = 1.85
 R = 1.7
-personHeight=0.50
+personHeight=1.18
 pan10 = -127.51
 pan20 = -126
 tilt10 = 0
 tilt20 = -6.2625
 
-#calibrate()
 
 while 1!=0 :
     r1 =requests.get(urlcam1+"query=position", auth=HTTPDigestAuth('root','pass'))
@@ -166,23 +151,7 @@ while 1!=0 :
     textarray = text1.splitlines()
     pan1 = float(textarray[0].split('=')[1])
     tilt1 = math.fabs(float(textarray[1].split('=')[1]))
-    #tilt1=0
 
-    #print("Bestäm pan")
-    #pan1 = float(input()) #input ges i riktiga koordinater
-
-    #print ("Bestäm tilt") #input exit om du vill stänga
-    #tilt1= float(input()) #input ges i riktiga koordinater
-    #pan1 = -171.93
-    #tilt1 = -8.11
-
-    #if input() == "Calibrate":
-    #    calibrate()
-
-    #print("du har valt "+pan1+" och "+ tilt1)
-    #pan1 = int(pan1)
-    #tilt1 = Decimal(tilt1)
-    #B = getB(h,tilt1, personHeight)
     B =  getB(h, tilt1, personHeight)
 
     virPan1=0
@@ -201,7 +170,7 @@ while 1!=0 :
     print("virpan1",virPan1)
     virPan2  = getPan2(R,virPan1,tilt1,B)
     pan2 = pan20-virPan2
-    tilt2 = getTilt2(R,virPan1,tilt1,B,h)
+    tilt2 = getTilt2(R,virPan1,tilt1,B,h-personHeight)
     print("tilt1",tilt1)
     print("tilt2",tilt2)
     print("pan2",pan2)
