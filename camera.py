@@ -86,11 +86,7 @@ def getB(h, tilt1, personHeight):
     if tilt1 != 0:
         B = (h - personHeight) / math.sin(math.radians(tilt1))
     else:
-<<<<<<< HEAD
             B = 1.7
-=======
-            B = h
->>>>>>> 4175b63b33882138a2b3b6fb6e9344562469c1d1
     return B
 
 # Beräkna pan2
@@ -101,7 +97,6 @@ def getPan2 (R, pan1, tilt1, B):
     pan2 = math.asin(Rtak*(math.sin(math.radians(pan1))/Ctak))
     print("Rtak",Rtak)
     print("pan2", math.degrees(pan2))
-<<<<<<< HEAD
 
     ss1=round(math.sin(math.radians(pan1))/Ctak,3)
     ss2=round(math.sin(pan2)/Rtak,3)
@@ -112,24 +107,10 @@ def getPan2 (R, pan1, tilt1, B):
         return math.degrees(pan2)
     else:
         return 180-math.degrees(pan2)
-=======
-    print("ss1",ss1,"ss2",ss2,"ss3",ss3)
-    if checksine(Rtak,R,Ctak,pan1,pan2) :
-        return math.degrees(pan2)
-    else:
-        return 180+math.degrees(pan2))
-
-def checksine(Rtak,R,Ctak,pan1,pan2):
-    ss1= math.sin(math.radians(pan1))/Ctak
-    ss2= math.sin(pan2)/Rtak
-    ss3= math.sin(math.pi-math.radians(pan1)-pan2)/R
-    return ss1 == ss2
-
->>>>>>> 4175b63b33882138a2b3b6fb6e9344562469c1d1
 # Beräkna tilt2
 
 def getTilt2 (R, pan1, tilt1, B, h):
-    if(pan1>90):
+    if(pan1>90 and pan1 < 180):
         Rvagg = B*math.cos(math.radians(pan1-90))
         Cvagg = math.sqrt((math.pow(R,2)) + (math.pow(Rvagg,2)) - 2 * R * Rvagg * math.cos(math.radians(180-tilt1)))
 
@@ -141,18 +122,20 @@ def getTilt2 (R, pan1, tilt1, B, h):
 
     tilt2 = math.degrees(math.asin(Rvagg * (math.sin(math.radians(tilt1)) / Cvagg)))
     print("tilt2 vid getTilt",tilt2)
-    if (math.fabs(tilt2) <70 ):
+    if (math.fabs(tilt2) <80):
         return tilt2
     else:
-<<<<<<< HEAD
         print("hej")
-=======
->>>>>>> 4175b63b33882138a2b3b6fb6e9344562469c1d1
         C90 = math.sqrt(B*B - R*R)
         print("C90",C90)
         print("h",h)
-        tilt2 = math.degrees(math.asin(0.87))
-        return tilt2
+        morot = h/C90
+        if (morot>1):
+            return tilt2
+        else:
+            tilt2 = math.degrees(math.asin(morot))
+            return tilt2
+
 
 def move() :
     #r = requests.get(urlcam1+"tilt="+str(tilt1))
@@ -163,9 +146,9 @@ def move() :
 #K1: pan 127.51, tilt 0. K2: pan -126, tilt -6.2625
 
 B=0
-h = 3.5
+h = 1.07
 R = 1.7
-personHeight=0.50
+personHeight=0.80
 pan10 = -127.51
 pan20 = -126
 tilt10 = 0
@@ -196,7 +179,7 @@ while 1!=0 :
     #pan1 = int(pan1)
     #tilt1 = Decimal(tilt1)
     #B = getB(h,tilt1, personHeight)
-    B = 1.5
+    B = getB(h, tilt1, personHeight)
 
     virPan1=0
     if pan10<0 and pan1<0:
