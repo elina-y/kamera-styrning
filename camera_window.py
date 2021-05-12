@@ -6,7 +6,7 @@ import time
 
 
 #captureStor = cv2.VideoCapture('rtsp://root.pass@169.254.203.231/axis-media/media.amp')
-captureStor = cv2.VideoCapture('http://169.254.203.231')
+#captureStor = cv2.VideoCapture('http://169.254.203.231')
 
 
 class App:
@@ -66,9 +66,9 @@ class App:
         self.label_hight = tk.Label(window, text = "hojd")
         self.label_hight.grid()
 
-        self.entry_distance = tk.entry(window)
+        self.entry_distance = tk.Entry(window)
         self.entry_distance.grid()
-        self.label_distance = tk.label(window, text="avstand")
+        self.label_distance = tk.Label(window, text="avstand")
         self.label_distance.grid()
 
 
