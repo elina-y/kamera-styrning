@@ -6,10 +6,10 @@ from decimal import Decimal
 import urllib3
 from requests.auth import HTTPDigestAuth
 
-global pan1
-global pan2
-global tilt1
-global tilt2
+#global pan1
+#global pan2
+#global tilt1
+#global tilt2
 global R
 global h
 global B
@@ -26,7 +26,7 @@ auth = HTTPDigestAuth('root','pass')
 #tilt gar mellan 0 - -90 grader vertikalt
 
 # R = avstand mellan kamerorna (m)
-# S = kamerornas hojd från golvet (m)
+# h = kamerornas hojd från golvet (m)
 # pan1 och tilt1 bestäms av användaren
 # B = avstandet från kameran till fokuspunkten
 
@@ -47,10 +47,47 @@ def newCalibration() :
     r2 = requests.get(urlcam2+q)
     t1 = r1.text.splitlines()
     t2 = r2.text.splitlines()
-    pan1n = float(t1[0].split('=')[1])
-    tilt1n = float(t1[1].split('=')[1])
-    pan2n = float(t2[0].split('=')[1])
-    tilt2n = float(t2[1].split('=')[1])
+    pan10 = float(t1[0].split('=')[1])
+    tilt10 = float(t1[1].split('=')[1])
+    pan20 = float(t2[0].split('=')[1])
+    tilt20 = float(t2[1].split('=')[1])
+
+def setPresets(height, spaceBetweenCameras):
+    h = height
+    R = spaceBetweenCameras
+
+def getVirtualPan(realPan):
+    virPan1=0
+    if pan10<0 and realPan<0:
+        virPan1=math.fabs(pan10)-math.fabs(realPan)
+
+    if pan10>0 and realPan>0 :
+        virPan1=math.fabs(pan10)-math.fabs(realPan)
+
+    if pan10<0 and realPan>0 :
+        virPan1=math.fabs(pan10)+math.fabs(realPan)
+
+    if pan10>0 and realPan<0 :
+        virPan1=-pan10+realPan
+
+    return virPan1
+
+def moveCameras(pan, tilt, cameraNumber) :
+
+    if (cameraNumber=1):
+        r = requests.get(urlcam1+"tilt=-"+str(tilt), auth=HTTPDigestAuth('root','pass'))
+        r = requests.get(urlcam1+"pan="+str(pan), auth=HTTPDigestAuth('root','pass'))
+    else:
+        r = requests.get(urlcam2+"tilt=-"+str(tilt), auth=HTTPDigestAuth('root','pass'))
+        r = requests.get(urlcam2+"pan="+str(pan), auth=HTTPDigestAuth('root','pass'))
+
+def getPositionCam1():
+    r1 =requests.get(urlcam1+"query=position", auth=HTTPDigestAuth('root','pass'))
+    text1 = r1.text
+    textarray = text1.splitlines()
+    pan = float(textarray[0].split('=')[1])
+    tilt = math.fabs(float(textarray[1].split('=')[1]))
+    return (pan,tilt)
 
 #def calibrate() :
     #r1 =requests.get(urlcam1+"query=position")
@@ -81,7 +118,7 @@ def getB(h, tilt1, personHeight):
     return B
 
 # Beräkna pan2
-def getPan2 (R, pan1, tilt1, B):
+def getPan2 (pan1, tilt1, B):
     Rtak = B*math.cos(math.radians(tilt1))
     Ctak = math.sqrt((math.pow(R,2)) + ((math.pow(Rtak,2)) - 2 * R * Rtak * math.cos(math.radians(pan1))))
     print("Ctak",Ctak)
@@ -100,10 +137,10 @@ def getPan2 (R, pan1, tilt1, B):
         return 180-math.degrees(pan2)
 # Beräkna tilt2
 
-def getTilt2 (R, pan1, tilt1, B, h):
+def getTilt2 (pan1, tilt1, B, personHeight):
     if(pan1>80 and pan1<100 ):
         Rvagg=B*math.sin(math.radians(tilt1))
-        Cvagg=math.sqrt(math.pow(h,2)+math.pow(R,2))
+        Cvagg=math.sqrt(math.pow((h-personHeight),2)+math.pow(R,2))
     elif(pan1>90 and pan1 < 135):
         Rvagg = B*math.cos(math.radians(pan1-90))
         Cvagg = math.sqrt((math.pow(R,2)) + (math.pow(Rvagg,2)) - 2 * R * Rvagg * math.cos(math.radians(180-tilt1)))
@@ -122,8 +159,8 @@ def getTilt2 (R, pan1, tilt1, B, h):
         print("hej")
         C90 = math.sqrt(B*B - R*R)
         print("C90",C90)
-        print("h",h)
-        morot = h/C90
+        print("h-personHeight",h-personHeight)
+        morot = (h-personHeight)/C90
         if (morot>1):
             return tilt2
         else:
@@ -135,44 +172,40 @@ def move() :
     r = requests.get(urlcam2+"tilt=-"+str(tilt2), auth=HTTPDigestAuth('root','pass'))
     r = requests.get(urlcam2+"pan="+str(pan2), auth=HTTPDigestAuth('root','pass'))
 
-B=0
-h = 1.85
-R = 1.7
-personHeight=1.18
-pan10 = -127.51
-pan20 = -126
-tilt10 = 0
-tilt20 = -6.2625
+#B=0
+#h = 1.85
+#R = 1.7
+#personHeight=1.18
+#pan10 = -127.51
+#pan20 = -126
+#tilt10 = 0
+#tilt20 = -6.2625
 
 
-while 1!=0 :
-    r1 =requests.get(urlcam1+"query=position", auth=HTTPDigestAuth('root','pass'))
-    text1 = r1.text
-    textarray = text1.splitlines()
-    pan1 = float(textarray[0].split('=')[1])
-    tilt1 = math.fabs(float(textarray[1].split('=')[1]))
-
-    B =  getB(h, tilt1, personHeight)
-
-    virPan1=0
-    if pan10<0 and pan1<0:
-        virPan1=math.fabs(pan10)-math.fabs(pan1)
-
-    if pan10>0 and pan1>0 :
-        virPan1=math.fabs(pan10)-math.fabs(pan1)
-
-    if pan10<0 and pan1>0 :
-        virPan1=math.fabs(pan10)+math.fabs(pan1)
-
-    if pan10>0 and pan1<0 :
-        virPan1=-pan10+pan1
-    print("B",B)
-    print("virpan1",virPan1)
-    virPan2  = getPan2(R,virPan1,tilt1,B)
-    pan2 = pan20-virPan2
-    tilt2 = getTilt2(R,virPan1,tilt1,B,h-personHeight)
-    print("tilt1",tilt1)
-    print("tilt2",tilt2)
-    print("pan2",pan2)
-    move()
-    break
+#while 1!=0 :
+#    r1 =requests.get(urlcam1+"query=position", auth=HTTPDigestAuth('root','pass'))
+#    text1 = r1.text
+#    pan1 = float(textarray[0].split('=')[1])
+#    tilt1 = math.fabs(float(textarray[1].split('=')[1]))
+#
+#    B =  getB(h, tilt1, personHeight)
+#
+#    virPan1=0
+#    if pan10<0 and pan1<0:
+#        virPan1=math.fabs(pan10)-math.fabs(pan1)
+#
+#    if pan10>0 and pan1>0 :
+#        virPan1=math.fabs(pan10)-math.fabs(pan1)
+#
+#    if pan10<0 and pan1>0 :
+#        virPan1=math.fabs(pan10)+math.fabs(pan1)
+#
+#    if pan10>0 and pan1<0 :
+#        virPan1=-pan10+pan1
+#    print("B",B)
+#    print("virpan1",virPan1)
+#    virPan2  = getPan2(R,virPan1,tilt1,B)
+#   print("tilt2",tilt2)
+#    print("pan2",pan2)
+#    move()
+#    break
