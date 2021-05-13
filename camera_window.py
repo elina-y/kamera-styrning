@@ -3,18 +3,24 @@ import cv2
 import PIL.ImageTk
 import PIL.Image
 import time
+import requests
+from requests.auth import HTTPDigestAuth
+from camera import moveCameras
 
-
-#captureStor = cv2.VideoCapture('rtsp://root.pass@169.254.203.231/axis-media/media.amp')
-#captureStor = cv2.VideoCapture('http://169.254.203.231')
+auth = HTTPDigestAuth('root','pass')
+captureStor = cv2.VideoCapture('rtsp://root.pass@169.254.203.231/axis-media/media.amp')
+captureLiten = cv2.VideoCapture('rtsp://root.pass@169.254.102.3/axis-media/media.amp')
+#rtsp://wowzaec2demo.streamlock.net/vod/mp4:BigBuckBunny_115k.mov
 
 
 class App:
-    def __init__(self, window, window_title, video_source1='rtsp://wowzaec2demo.streamlock.net/vod/mp4:BigBuckBunny_115k.mov', video_source2='rtsp://wowzaec2demo.streamlock.net/vod/mp4:BigBuckBunny_115k.mov'):
+    def __init__(self, window, window_title, video_source1='rtsp://root.pass@169.254.203.231/axis-media/media.amp', video_source2='rtsp://root.pass@169.254.102.3/axis-media/media.amp'):
         self.window = window
         self.window.title(window_title)
         self.video_source1 = video_source1
         self.video_source2 = video_source2
+        self.window.resizable(0,0)
+        self.window.pack_propagate(0)
 
 
      # open video source
@@ -22,10 +28,10 @@ class App:
 
 
          # Create a canvas that can fit the above video source size
-        self.canvas1 = tk.Canvas(window, width=600, height=400)
-        self.canvas2 = tk.Canvas(window, width=600, height=400)
-        self.canvas1.grid(padx=10, pady=10, columnspan=2, row=0, column=0)
-        self.canvas2.grid(padx=10, pady=10, columnspan=2, row=0, column=3)
+        self.canvas1 = tk.Canvas(window, width=560, height=500)
+        self.canvas2 = tk.Canvas(window, width=560, height=500)
+        self.canvas1.grid(padx=10, pady=0, columnspan=2, row=0, column=0)
+        self.canvas2.grid(padx=10, pady=0, columnspan=2, row=0, column=3)
 
 
 
@@ -41,42 +47,49 @@ class App:
 
         self.scale_pan1 = tk.Scale(window, from_=-180, to=180, orient=tk.HORIZONTAL)
         #self.scale_pan1.pack(anchor=tk.SE, expand=True)
-        self.scale_pan1.grid(padx=6, pady=10, row=1, column=0, sticky=tk.E, rowspan=2)
-        self.label_pan1 = tk.Label(window, text="Pan")
+        self.scale_pan1.grid(padx=6, pady=0, row=1, column=0, sticky=tk.E, rowspan=2)
+        self.label_pan1 = tk.Label(window, text="Rotate")
         self.label_pan1.grid(row=1, column=0, sticky=tk.E, padx=40)
 
         self.scale_tilt1 = tk.Scale(window, from_=0, to=90, orient=tk.VERTICAL, command=self.tilt("tilt1"))
-        self.scale_tilt1.grid(padx=5, pady=10, row=1, column=1, sticky=tk.W, rowspan=2)
+        self.scale_tilt1.grid(padx=5, pady=0, row=1, column=1, sticky=tk.W, rowspan=2)
         self.label_tilt1 = tk.Label(window, text="Tilt")
         self.label_tilt1.grid(row=1, column=1, sticky=tk.W, padx=50, rowspan=2)
 
+        self.scale_focus = tk.Scale(window, from_=10, to=0, orient=tk.VERTICAL, resolution=0.1)
+        self.scale_focus.grid(padx=5, pady=0, row=1, column=1, rowspan=2)
+        self.label_focus = tk.Label(window, text="Focus height")
+        self.label_focus.grid(row=1, column=1, sticky=tk.E, padx=50, rowspan=2)
+        self.scale_focus.grid_remove()
+        self.label_focus.grid_remove()
+
         self.scale_pan2 = tk.Scale(window, from_=-180, to=180, orient=tk.HORIZONTAL)
-        self.scale_pan2.grid(padx=5, pady=10, row=1, column=3, sticky=tk.E, rowspan=2)
-        self.label_pan2 = tk.Label(window, text="Pan")
+        self.scale_pan2.grid(padx=5, pady=0, row=1, column=3, sticky=tk.E, rowspan=2)
+        self.label_pan2 = tk.Label(window, text="Rotate")
         self.label_pan2.grid(row=1, column=3, sticky=tk.E, padx=40)
 
         self.scale_tilt2 = tk.Scale(window, from_=0, to=90, orient=tk.VERTICAL)
-        self.scale_tilt2.grid(padx=5, pady=10, row=1, column=4, sticky=tk.W, rowspan=2)
+        self.scale_tilt2.grid(padx=5, pady=0, row=1, column=4, sticky=tk.W, rowspan=2)
         self.label_tilt2 = tk.Label(window, text="Tilt")
         self.label_tilt2.grid(row=1, column=4, sticky=tk.W, padx=50, rowspan=2)
 
 
-        self.entry_hight = tk.Entry(window)
-        self.entry_hight.grid()
-        self.label_hight = tk.Label(window, text = "hojd")
-        self.label_hight.grid()
+        self.entry_height = tk.Entry(window)
+        self.entry_height.grid(row=1, column=2, sticky=tk.S)
+        self.label_height = tk.Label(window, text = "Camera height")
+        self.label_height.grid(pady=20, row=1, column=2, sticky=tk.N)
 
         self.entry_distance = tk.Entry(window)
-        self.entry_distance.grid()
-        self.label_distance = tk.Label(window, text="avstand")
-        self.label_distance.grid()
+        self.entry_distance.grid(pady=0, row=2, column=2, sticky=tk.S)
+        self.label_distance = tk.Label(window, text="Distance between cameras")
+        self.label_distance.grid(pady=20,row=2, column=2, sticky=tk.N)
 
-
+        #padiy, padix
 
         self.button_calibrate = tk.Button(window, text="Calibrate", width=7, command=self.calibrate)
-        self.button_calibrate.grid(row=1,column=2)
+        self.button_calibrate.grid(pady=20, row=3,column=2)
         self.button_reset = tk.Button(window, text="Reset", width=7, command=self.reset)
-        self.button_reset.grid(row=2,column=2)
+        self.button_reset.grid(pady=80, padx=43, row=1,column=2, rowspan=3)
         self.button_reset.grid_remove()
          # After it is called once, the update method will be automatically called every delay milliseconds
         self.delay = 5
@@ -84,18 +97,11 @@ class App:
 
         self.window.mainloop()
 
-    def StartValues(x, y):
-        y = int(self.entry_hight.get())
-        x = int(self.entry_distance.get())
-        return x,y;
+    def StartValues(self):
+        height = int(self.entry_height.get())
+        distance = int(self.entry_distance.get())
+        return height,distance;
 
-
-    def snapshot(self):
-         # Get a frame from the video source
-        ret, frame = self.vid.get_frame()
-
-        if ret:
-                cv2.imwrite("frame-" + time.strftime("%d-%m-%Y-%H-%M-%S") + ".jpg", cv2.cvtColor(frame, cv2.COLOR_RGB2BGR))
 
     def calibrate(self):
          # Calibrate the cameras and make scales for camera two disappear
@@ -106,6 +112,16 @@ class App:
          self.button_calibrate.grid_remove()
          self.button_reset.grid()
 
+         height, dis = self.StartValues()
+         self.scale_focus.config(from_=height)
+         self.entry_height.grid_remove()
+         self.label_height.grid_remove()
+         self.entry_distance.grid_remove()
+         self.label_distance.grid_remove()
+         self.scale_focus.grid()
+         self.label_focus.grid()
+
+
     def reset(self):
          self.scale_pan2.grid()
          self.scale_tilt2.grid()
@@ -113,10 +129,22 @@ class App:
          self.label_tilt2.grid()
          self.button_calibrate.grid()
          self.button_reset.grid_remove()
+         self.entry_height.grid()
+         self.label_height.grid()
+         self.entry_distance.grid()
+         self.label_distance.grid()
+         self.scale_focus.grid_remove()
+         self.label_focus.grid_remove()
 
     def tilt(value, title_scale):
-        print(value)
-        print(title_scale)
+         #r = requests.get('http://169.254.203.231/axis-cgi/com/ptz.cgi?'+"tilt=-"+"30", auth=HTTPDigestAuth('root','pass'))
+         #r = requests.get('http://169.254.203.231/axis-cgi/com/ptz.cgi?'+"pan="+"79", auth=HTTPDigestAuth('root','pass'))
+        if(title_scale=="tilt1"):
+            print(value)
+            moveCameras(70, value, 1)
+        else:
+            print(value)
+            print(title_scale)
 
     def update(self):
          # Get a frame from the video source

@@ -36,8 +36,8 @@ auth = HTTPDigestAuth('root','pass')
 # MAC LILLA 00408CB977FF
 # Mac STORA ACCC8ED91461
 #ip för kamerorna
-urlcam1 = 'http://169.254.203.230/axis-cgi/com/ptz.cgi?'
-urlcam2 = 'http://169.254.135.93/axis-cgi/com/ptz.cgi?'
+urlcam1 = 'http://169.254.203.231/axis-cgi/com/ptz.cgi?'
+urlcam2 = 'http://169.254.102.3/axis-cgi/com/ptz.cgi?'
 #Beräkna
 
 #Denna ska kopplas till calibrate-knappen och ersätta andra calib funken
@@ -74,7 +74,8 @@ def getVirtualPan(realPan):
 
 def moveCameras(pan, tilt, cameraNumber) :
 
-    if (cameraNumber=1):
+    if (cameraNumber==1):
+        print("Nu är jag i moveCameras")
         r = requests.get(urlcam1+"tilt=-"+str(tilt), auth=HTTPDigestAuth('root','pass'))
         r = requests.get(urlcam1+"pan="+str(pan), auth=HTTPDigestAuth('root','pass'))
     else:
