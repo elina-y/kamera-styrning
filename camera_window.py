@@ -4,8 +4,20 @@ import PIL.ImageTk
 import PIL.Image
 import time
 import requests
+
+
+
 from requests.auth import HTTPDigestAuth
-from camera import moveCameras
+from camera import tiltCameras, panCameras, getPositionCam1, getVirtualPan, getB, newCalibration, getTilt2, getPan2
+
+R = 0
+h =0
+B = 1
+personHeight =0
+tilt20 = 0
+pan20 = 0
+tilt10 = 0
+pan10 = 0
 
 auth = HTTPDigestAuth('root','pass')
 captureStor = cv2.VideoCapture('rtsp://root.pass@169.254.203.231/axis-media/media.amp')
@@ -45,30 +57,40 @@ class App:
         #self.btn_snapshot=tk.Button(window, text="Snapshot", width=50, command=self.snapshot)
         #self.btn_snapshot.pack(anchor=tk.CENTER, expand=True)
 
-        self.scale_pan1 = tk.Scale(window, from_=-180, to=180, orient=tk.HORIZONTAL)
+
+        file = open("angles.txt","r")
+        angles = file.readlines()
+        file.close()
+        panCameras(angles[0][:-1],1)
+        tiltCameras(angles[1][:-1],1)
+        panCameras(angles[2][:-1],2)
+        tiltCameras(angles[3][:-1],2)
+        print(angles[0][:-1], angles[1][:-1])
+
+        self.scale_pan1 = tk.Scale(window, from_=-180, to=180, orient=tk.HORIZONTAL, command=self.pan1)
         #self.scale_pan1.pack(anchor=tk.SE, expand=True)
         self.scale_pan1.grid(padx=6, pady=0, row=1, column=0, sticky=tk.E, rowspan=2)
         self.label_pan1 = tk.Label(window, text="Rotate")
         self.label_pan1.grid(row=1, column=0, sticky=tk.E, padx=40)
 
-        self.scale_tilt1 = tk.Scale(window, from_=0, to=90, orient=tk.VERTICAL, command=self.tilt("tilt1"))
+        self.scale_tilt1 = tk.Scale(window, from_=0, to=90, orient=tk.VERTICAL, command=self.tilt1 )
         self.scale_tilt1.grid(padx=5, pady=0, row=1, column=1, sticky=tk.W, rowspan=2)
         self.label_tilt1 = tk.Label(window, text="Tilt")
         self.label_tilt1.grid(row=1, column=1, sticky=tk.W, padx=50, rowspan=2)
 
-        self.scale_focus = tk.Scale(window, from_=10, to=0, orient=tk.VERTICAL, resolution=0.1)
+        self.scale_focus = tk.Scale(window, from_=10, to=0, orient=tk.VERTICAL, resolution=0.1,command = self.focusHeight)
         self.scale_focus.grid(padx=5, pady=0, row=1, column=1, rowspan=2)
         self.label_focus = tk.Label(window, text="Focus height")
         self.label_focus.grid(row=1, column=1, sticky=tk.E, padx=50, rowspan=2)
         self.scale_focus.grid_remove()
         self.label_focus.grid_remove()
 
-        self.scale_pan2 = tk.Scale(window, from_=-180, to=180, orient=tk.HORIZONTAL)
+        self.scale_pan2 = tk.Scale(window, from_=-180, to=180, orient=tk.HORIZONTAL, command=self.pan2)
         self.scale_pan2.grid(padx=5, pady=0, row=1, column=3, sticky=tk.E, rowspan=2)
         self.label_pan2 = tk.Label(window, text="Rotate")
         self.label_pan2.grid(row=1, column=3, sticky=tk.E, padx=40)
 
-        self.scale_tilt2 = tk.Scale(window, from_=0, to=90, orient=tk.VERTICAL)
+        self.scale_tilt2 = tk.Scale(window, from_=0, to=90, orient=tk.VERTICAL, command=self.tilt2)
         self.scale_tilt2.grid(padx=5, pady=0, row=1, column=4, sticky=tk.W, rowspan=2)
         self.label_tilt2 = tk.Label(window, text="Tilt")
         self.label_tilt2.grid(row=1, column=4, sticky=tk.W, padx=50, rowspan=2)
@@ -91,6 +113,15 @@ class App:
         self.button_reset = tk.Button(window, text="Reset", width=7, command=self.reset)
         self.button_reset.grid(pady=80, padx=43, row=1,column=2, rowspan=3)
         self.button_reset.grid_remove()
+
+
+        #pan10,tilt10,pan20,tilt20 = newCalibration()
+        self.scale_pan1.set(angles[0][:-1])
+        self.scale_tilt1.set("-"+angles[1][:-1])
+        self.scale_pan2.set(angles[2][:-1])
+        self.scale_tilt2.set("-"+angles[3][:-1])
+        #print(pan10, tilt10, pan20, tilt20)
+
          # After it is called once, the update method will be automatically called every delay milliseconds
         self.delay = 5
         self.update()
@@ -98,8 +129,8 @@ class App:
         self.window.mainloop()
 
     def StartValues(self):
-        height = int(self.entry_height.get())
-        distance = int(self.entry_distance.get())
+        height = float(self.entry_height.get())
+        distance = float(self.entry_distance.get())
         return height,distance;
 
 
@@ -112,16 +143,30 @@ class App:
          self.button_calibrate.grid_remove()
          self.button_reset.grid()
 
-         height, dis = self.StartValues()
-         self.scale_focus.config(from_=height)
+         global pan10
+         global pan20
+         global h
+         global R
+         pan10,t10,pan20,t20 = newCalibration()
+         h, R = self.StartValues()
+         print("h",h)
+
+         global B
+         B = getB(h,0,0)
+
+         self.scale_focus.config(from_=h)
          self.entry_height.grid_remove()
          self.label_height.grid_remove()
          self.entry_distance.grid_remove()
          self.label_distance.grid_remove()
          self.scale_focus.grid()
          self.label_focus.grid()
-
-
+         self.scale_pan1.config(command=self.pan1cfg)
+         self.scale_tilt1.config(command=self.tilt1cfg)
+         file = open("angles.txt","w")
+         L=[str(pan10),"\n",str(tilt10),"\n",str(pan20),"\n",str(tilt20),"\n"]
+         file.writelines(L)
+         file.close()
     def reset(self):
          self.scale_pan2.grid()
          self.scale_tilt2.grid()
@@ -135,16 +180,65 @@ class App:
          self.label_distance.grid()
          self.scale_focus.grid_remove()
          self.label_focus.grid_remove()
+         self.scale_pan1.config(command=self.pan1)
+         self.scale_tilt1.config(command=self.tilt1)
+         tiltCameras(tilt10,1)
+         tiltCameras(tilt20,2)
+         panCameras(pan10,1)
+         panCameras(pan20,2)
+    def tilt1(obj,value):
 
-    def tilt(value, title_scale):
-         #r = requests.get('http://169.254.203.231/axis-cgi/com/ptz.cgi?'+"tilt=-"+"30", auth=HTTPDigestAuth('root','pass'))
-         #r = requests.get('http://169.254.203.231/axis-cgi/com/ptz.cgi?'+"pan="+"79", auth=HTTPDigestAuth('root','pass'))
-        if(title_scale=="tilt1"):
-            print(value)
-            moveCameras(70, value, 1)
-        else:
-            print(value)
-            print(title_scale)
+        tiltCameras(value, 1)
+
+    def tilt2(obj,value):
+
+        tiltCameras(value, 2)
+
+    def pan1(obj,value):
+
+        panCameras(value, 1)
+
+    def pan2(obj,value):
+
+        panCameras(value, 2)
+
+
+    def tilt1cfg(obj,value):
+        tiltCameras(value, 1)
+        pan1, tilt1 = getPositionCam1()
+        virPan = getVirtualPan(pan1,pan10)
+        tilt2 = getTilt2(virPan, tilt1,R,B,h,personHeight)
+        print("virpan",virPan,"tilt1", tilt1,"R",R,"B",B,"h",h,"personHeight",personHeight,"tilt2",tilt2)
+        tiltCameras(tilt2, 2)
+
+    def pan1cfg(obj,value):
+
+        panCameras(value, 1)
+        pan1, tilt1 = getPositionCam1()
+        virPan = getVirtualPan(pan1,pan10)
+        virPan2 = getPan2(virPan, tilt1,R,B)
+        pan2 = pan20 - virPan2
+        print("virPan",virPan,"tilt1",tilt1,"R",R,"B",B,"pan2",virPan2)
+        panCameras(pan2, 2)
+
+    def focusHeight(obj,value):
+        pan1, tilt1 = getPositionCam1()
+        global B
+        B = getB(h,tilt1,value)
+        global personHeight
+        personHeight = value
+
+        pan1, tilt1 = getPositionCam1()
+        virPan = getVirtualPan(pan1,pan10)
+        tilt2 = getTilt2(virPan, tilt1,R,B,h,personHeight)
+        print("virpan",virPan,"tilt1", tilt1,"R",R,"B",B,"h",h,"personHeight",personHeight,"tilt2",tilt2)
+        tiltCameras(tilt2, 2)
+        virPan2 = getPan2(virPan, tilt1,R,B)
+        pan2 = pan20 - virPan2
+        print("virPan",virPan,"tilt1",tilt1,"R",R,"B",B,"pan2",virPan2)
+        panCameras(pan2, 2)
+
+
 
     def update(self):
          # Get a frame from the video source

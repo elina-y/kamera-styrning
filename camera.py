@@ -10,13 +10,7 @@ from requests.auth import HTTPDigestAuth
 #global pan2
 #global tilt1
 #global tilt2
-global R
-global h
-global B
-global tilt20
-global pan20
-global tilt10
-global pan10
+
 global auth
 
 
@@ -43,20 +37,22 @@ urlcam2 = 'http://169.254.102.3/axis-cgi/com/ptz.cgi?'
 #Denna ska kopplas till calibrate-knappen och ersätta andra calib funken
 def newCalibration() :
     q = "query=position"
-    r1 = requests.get(urlcam1+q)
-    r2 = requests.get(urlcam2+q)
+    r1 = requests.get(urlcam1+q,auth=HTTPDigestAuth('root','pass'))
+    r2 = requests.get(urlcam2+q,auth=HTTPDigestAuth('root','pass'))
     t1 = r1.text.splitlines()
     t2 = r2.text.splitlines()
     pan10 = float(t1[0].split('=')[1])
     tilt10 = float(t1[1].split('=')[1])
     pan20 = float(t2[0].split('=')[1])
     tilt20 = float(t2[1].split('=')[1])
+    return (pan10,tilt10,pan20,tilt20)
 
 def setPresets(height, spaceBetweenCameras):
     h = height
     R = spaceBetweenCameras
+    personHeight = 0
 
-def getVirtualPan(realPan):
+def getVirtualPan(realPan,pan10):
     virPan1=0
     if pan10<0 and realPan<0:
         virPan1=math.fabs(pan10)-math.fabs(realPan)
@@ -72,14 +68,25 @@ def getVirtualPan(realPan):
 
     return virPan1
 
-def moveCameras(pan, tilt, cameraNumber) :
+def tiltCameras(tilt, cameraNumber) :
 
     if (cameraNumber==1):
         print("Nu är jag i moveCameras")
         r = requests.get(urlcam1+"tilt=-"+str(tilt), auth=HTTPDigestAuth('root','pass'))
-        r = requests.get(urlcam1+"pan="+str(pan), auth=HTTPDigestAuth('root','pass'))
+        #r = requests.get(urlcam1+"pan="+str(pan), auth=HTTPDigestAuth('root','pass'))
+    #    moveothercam(virpan,tilt)
     else:
         r = requests.get(urlcam2+"tilt=-"+str(tilt), auth=HTTPDigestAuth('root','pass'))
+        #r = requests.get(urlcam2+"pan="+str(pan), auth=HTTPDigestAuth('root','pass'))
+
+def panCameras(pan, cameraNumber) :
+
+    if (cameraNumber==1):
+        #print("Nu är jag i moveCameras")
+        #r = requests.get(urlcam1+"tilt=-"+str(tilt), auth=HTTPDigestAuth('root','pass'))
+        r = requests.get(urlcam1+"pan="+str(pan), auth=HTTPDigestAuth('root','pass'))
+    else:
+        #r = requests.get(urlcam2+"tilt=-"+str(tilt), auth=HTTPDigestAuth('root','pass'))
         r = requests.get(urlcam2+"pan="+str(pan), auth=HTTPDigestAuth('root','pass'))
 
 def getPositionCam1():
@@ -109,17 +116,19 @@ def getPositionCam1():
     #r = requests.get(urlcam2+"pan="+str(pan20))
 
 
-def getB(h, tilt1, personHeight):
+def getB(h,tilt1, myPersonHeight):
     #B är längden till punkten vi vill kolla på, S höjden över golvet
+
     if tilt1 != 0:
-        B = (h - personHeight) / math.sin(math.radians(tilt1))
+        myB = (h - float(myPersonHeight)) / math.sin(math.radians(tilt1))
     else:
-            B = 4
-    print("B",B)
-    return B
+            myB = 4
+    print("B",myB)
+
+    return myB
 
 # Beräkna pan2
-def getPan2 (pan1, tilt1, B):
+def getPan2 (pan1, tilt1,R,B):
     Rtak = B*math.cos(math.radians(tilt1))
     Ctak = math.sqrt((math.pow(R,2)) + ((math.pow(Rtak,2)) - 2 * R * Rtak * math.cos(math.radians(pan1))))
     print("Ctak",Ctak)
@@ -138,7 +147,7 @@ def getPan2 (pan1, tilt1, B):
         return 180-math.degrees(pan2)
 # Beräkna tilt2
 
-def getTilt2 (pan1, tilt1, B, personHeight):
+def getTilt2 (pan1, tilt1,R,B, h,personHeight):
     if(pan1>80 and pan1<100 ):
         Rvagg=B*math.sin(math.radians(tilt1))
         Cvagg=math.sqrt(math.pow((h-personHeight),2)+math.pow(R,2))
@@ -160,7 +169,7 @@ def getTilt2 (pan1, tilt1, B, personHeight):
         print("hej")
         C90 = math.sqrt(B*B - R*R)
         print("C90",C90)
-        print("h-personHeight",h-personHeight)
+#        print("h-personHeight",h-personHeight)
         morot = (h-personHeight)/C90
         if (morot>1):
             return tilt2
